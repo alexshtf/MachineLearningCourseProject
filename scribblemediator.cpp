@@ -54,14 +54,16 @@ void ScribbleMediator::startScribble(QMouseEvent* event)
     if (!_enabled)
         return;
 
-
     auto scenePoint = _parent->mapToScene(event->pos());
     QPainterPath path(scenePoint);
-    qDebug() << path.toFillPolygon();
+
+    QPen pen(_color);
+    pen.setCosmetic(true);
 
     _pathItem = new QGraphicsPathItem;
     _pathItem->setPath(path);
-    _pathItem->setPen(QPen(_color));
+    _pathItem->setPen(pen);
+
     _parent->scene()->addItem(_pathItem);
 }
 
