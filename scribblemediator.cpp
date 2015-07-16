@@ -3,6 +3,7 @@
 #include <QEvent>
 #include <QMouseEvent>
 #include <QGraphicsPathItem>
+#include <QDebug>
 
 ScribbleMediator::ScribbleMediator(QGraphicsView *parent) : QObject(parent),
     _parent(parent),
@@ -40,6 +41,8 @@ bool ScribbleMediator::eventFilter(QObject* object, QEvent* event)
         case QEvent::MouseMove:
             scribble(mouseEvent);
             break;
+        default:
+            break;
         }
     }
 
@@ -51,12 +54,15 @@ void ScribbleMediator::startScribble(QMouseEvent* event)
     if (!_enabled)
         return;
 
-    QPainterPath path;
 
     auto scenePoint = _parent->mapToScene(event->pos());
-    path.moveTo(scenePoint);
+    QPainterPath path(scenePoint);
+    qDebug() << path.toFillPolygon();
 
-    _pathItem = _parent->scene()->addPath(path, QPen(_color));
+    _pathItem = new QGraphicsPathItem;
+    _pathItem->setPath(path);
+    _pathItem->setPen(QPen(_color));
+    _parent->scene()->addItem(_pathItem);
 }
 
 
