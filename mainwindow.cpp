@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "zoommediator.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QGraphicsPixmapItem>
@@ -12,6 +13,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     _ui->setupUi(this);
     _ui->graphicsView->setScene(_scene);
+
+    // make mouse wheel perform zoom operations on the graphics view
+    _zoomMediator = new ZoomMediator(_ui->graphicsView);
 
     // ensure that one of the image tools is active each time.
     QActionGroup* imageTools = new QActionGroup(this);
@@ -55,17 +59,26 @@ void MainWindow::on_actionOpenImage_triggered()
 void MainWindow::on_actionScribble_toggled(bool checked)
 {
     if (checked)
+    {
         _ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
+        _zoomMediator->SetEnabled(false);
+    }
 }
 
 void MainWindow::on_actionErase_toggled(bool checked)
 {
     if (checked)
+    {
         _ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
+        _zoomMediator->SetEnabled(false);
+    }
 }
 
 void MainWindow::on_actionHand_toggled(bool checked)
 {
     if (checked)
+    {
         _ui->graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
+        _zoomMediator->SetEnabled(true);
+    }
 }

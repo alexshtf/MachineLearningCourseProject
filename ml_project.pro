@@ -13,8 +13,10 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    zoommediator.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    zoommediator.h
 
 FORMS    += mainwindow.ui

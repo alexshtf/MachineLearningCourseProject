@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "zoommediator.h"
 #include <QMainWindow>
 #include <memory>
 
@@ -32,6 +33,7 @@ private:
     Ui::MainWindow* _ui;
     QGraphicsScene* _scene;
     QGraphicsPixmapItem* _imagePixmapItem;
+    ZoomMediator* _zoomMediator;
 };
 
 #endif // MAINWINDOW_H
