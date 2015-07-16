@@ -65,6 +65,7 @@ void MainWindow::on_actionScribble_toggled(bool checked)
     {
         _ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
         _zoomMediator->SetEnabled(false);
+        _scribbleMediator->setEnabled(true);
     }
 }
 
@@ -74,6 +75,7 @@ void MainWindow::on_actionErase_toggled(bool checked)
     {
         _ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
         _zoomMediator->SetEnabled(false);
+        _scribbleMediator->setEnabled(false);
     }
 }
 
@@ -83,5 +85,17 @@ void MainWindow::on_actionHand_toggled(bool checked)
     {
         _ui->graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
         _zoomMediator->SetEnabled(true);
+        _scribbleMediator->setEnabled(false);
+    }
+}
+
+void MainWindow::on_labelsTableWidget_itemSelectionChanged()
+{
+    auto selectedItems = _ui->labelsTableWidget->selectedItems();
+    for(auto item : selectedItems)
+    {
+        auto row = item->row();
+        auto colorItem = _ui->labelsTableWidget->item(row, 0);
+        _scribbleMediator->setColor(colorItem->backgroundColor());
     }
 }
