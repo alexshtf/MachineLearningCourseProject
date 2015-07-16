@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent) :
     // make mouse wheel perform zoom operations on the graphics view
     _zoomMediator = new ZoomMediator(_ui->graphicsView);
 
+    // allow the user to draw scribbles
+    _scribbleMediator = new ScribbleMediator(_ui->graphicsView);
+
     // ensure that one of the image tools is active each time.
     QActionGroup* imageTools = new QActionGroup(this);
     imageTools->addAction(_ui->actionHand);

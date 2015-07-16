@@ -14,9 +14,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    zoommediator.cpp
+    zoommediator.cpp \
+    scribblemediator.cpp
 
 HEADERS  += mainwindow.h \
-    zoommediator.h
+    zoommediator.h \
+    scribblemediator.h
 
 FORMS    += mainwindow.ui

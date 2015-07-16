@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "zoommediator.h"
+#include "scribblemediator.h"
 #include <QMainWindow>
 #include <memory>
 
@@ -34,6 +35,7 @@ private:
     QGraphicsScene* _scene;
     QGraphicsPixmapItem* _imagePixmapItem;
     ZoomMediator* _zoomMediator;
+    ScribbleMediator* _scribbleMediator;
 };
 
 #endif // MAINWINDOW_H
