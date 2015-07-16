@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete _ui;
 }
 
 void MainWindow::on_actionOpenImage_triggered()
@@ -49,4 +50,22 @@ void MainWindow::on_actionOpenImage_triggered()
             );
         }
     }
+}
+
+void MainWindow::on_actionScribble_toggled(bool checked)
+{
+    if (checked)
+        _ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
+}
+
+void MainWindow::on_actionErase_toggled(bool checked)
+{
+    if (checked)
+        _ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
+}
+
+void MainWindow::on_actionHand_toggled(bool checked)
+{
+    if (checked)
+        _ui->graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
 }

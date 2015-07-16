@@ -22,8 +22,14 @@ public:
 private slots:
     void on_actionOpenImage_triggered();
 
+    void on_actionScribble_toggled(bool checked);
+
+    void on_actionErase_toggled(bool arg1);
+
+    void on_actionHand_toggled(bool arg1);
+
 private:
-    std::unique_ptr<Ui::MainWindow> _ui;
+    Ui::MainWindow* _ui;
     QGraphicsScene* _scene;
     QGraphicsPixmapItem* _imagePixmapItem;
 };
