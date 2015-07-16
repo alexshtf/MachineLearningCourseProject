@@ -2,10 +2,14 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <memory>
 
 namespace Ui {
 class MainWindow;
 }
+
+class QGraphicsScene;
+class QGraphicsPixmapItem;
 
 class MainWindow : public QMainWindow
 {
@@ -19,7 +23,9 @@ private slots:
     void on_actionOpenImage_triggered();
 
 private:
-    Ui::MainWindow *ui;
+    std::unique_ptr<Ui::MainWindow> _ui;
+    QGraphicsScene* _scene;
+    QGraphicsPixmapItem* _imagePixmapItem;
 };
 
 #endif // MAINWINDOW_H
