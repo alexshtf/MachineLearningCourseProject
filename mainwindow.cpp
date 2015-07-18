@@ -26,6 +26,9 @@ MainWindow::MainWindow(QWidget *parent) :
     imageTools->addAction(_ui->actionErase);
     imageTools->addAction(_ui->actionScribble);
     _ui->actionHand->setChecked(true);
+
+    // select a label
+    _ui->labelsTableWidget->selectRow(0);
 }
 
 MainWindow::~MainWindow()
@@ -46,15 +49,9 @@ void MainWindow::on_actionOpenImage_triggered()
         QPixmap pixmap;
         if (pixmap.load(fileName))
         {
-            // clear the scene of everything except the image item
-            for(auto item : _ui->graphicsView->scene()->items())
-                if (item != _imagePixmapItem)
-                    _ui->graphicsView->scene()->removeItem(item);
-
-            // show the image and fit it in view
-            _imagePixmapItem->setPixmap(pixmap);
-            _ui->graphicsView->scene()->setSceneRect(_imagePixmapItem->boundingRect());
-            _ui->graphicsView->fitInView(_imagePixmapItem);
+            clearAllScribbles();
+            showPixmapFitInView(pixmap);
+            enableDisableScribble();
         }
         else
         {
@@ -65,6 +62,21 @@ void MainWindow::on_actionOpenImage_triggered()
             );
         }
     }
+}
+
+
+void MainWindow::clearAllScribbles()
+{
+    for(auto item : _ui->graphicsView->scene()->items())
+        if (item != _imagePixmapItem)
+            _ui->graphicsView->scene()->removeItem(item);
+}
+
+void MainWindow::showPixmapFitInView(QPixmap pixmap)
+{
+    _imagePixmapItem->setPixmap(pixmap);
+    _ui->graphicsView->scene()->setSceneRect(_imagePixmapItem->boundingRect());
+    _ui->graphicsView->fitInView(_imagePixmapItem);
 }
 
 void MainWindow::on_actionScribble_toggled(bool checked)
@@ -99,11 +111,24 @@ void MainWindow::on_actionHand_toggled(bool checked)
 
 void MainWindow::on_labelsTableWidget_itemSelectionChanged()
 {
-    auto selectedItems = _ui->labelsTableWidget->selectedItems();
-    for(auto item : selectedItems)
+    enableDisableScribble();
+
+    for(auto item : _ui->labelsTableWidget->selectedItems())
     {
         auto row = item->row();
         auto colorItem = _ui->labelsTableWidget->item(row, 0);
         _scribbleMediator->setColor(colorItem->backgroundColor());
     }
+}
+
+
+void MainWindow::enableDisableScribble()
+{
+    if (_ui->labelsTableWidget->selectedItems().empty() || _imagePixmapItem->pixmap().isNull())
+    {
+        _ui->actionScribble->setEnabled(false);
+        _ui->actionHand->setChecked(true);
+    }
+    else
+        _ui->actionScribble->setEnabled(true);
 }

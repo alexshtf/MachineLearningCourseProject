@@ -23,10 +23,15 @@ public:
 
 private slots:
     void on_actionOpenImage_triggered();
+    void clearAllScribbles();
+    void showPixmapFitInView(QPixmap pixmap);
+
     void on_actionScribble_toggled(bool checked);
     void on_actionErase_toggled(bool arg1);
     void on_actionHand_toggled(bool arg1);
     void on_labelsTableWidget_itemSelectionChanged();
+
+    void enableDisableScribble();
 
 private:
     Ui::MainWindow* _ui;
