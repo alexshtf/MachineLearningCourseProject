@@ -47,6 +47,8 @@ void MainWindow::on_actionOpenImage_triggered()
         if (pixmap.load(fileName))
         {
             _imagePixmapItem->setPixmap(pixmap);
+            _ui->graphicsView->scene()->setSceneRect(_imagePixmapItem->boundingRect());
+            _ui->graphicsView->fitInView(_imagePixmapItem);
         }
         else
         {
