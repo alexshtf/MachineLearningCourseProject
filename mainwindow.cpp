@@ -46,6 +46,12 @@ void MainWindow::on_actionOpenImage_triggered()
         QPixmap pixmap;
         if (pixmap.load(fileName))
         {
+            // clear the scene of everything except the image item
+            for(auto item : _ui->graphicsView->scene()->items())
+                if (item != _imagePixmapItem)
+                    _ui->graphicsView->scene()->removeItem(item);
+
+            // show the image and fit it in view
             _imagePixmapItem->setPixmap(pixmap);
             _ui->graphicsView->scene()->setSceneRect(_imagePixmapItem->boundingRect());
             _ui->graphicsView->fitInView(_imagePixmapItem);
