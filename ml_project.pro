@@ -16,10 +16,12 @@ CONFIG += c++11
 SOURCES += main.cpp\
         mainwindow.cpp \
     zoommediator.cpp \
-    scribblemediator.cpp
+    scribblemediator.cpp \
+    scribblemaskgenerator.cpp
 
 HEADERS  += mainwindow.h \
     zoommediator.h \
-    scribblemediator.h
+    scribblemediator.h \
+    scribblemaskgenerator.h
 
 FORMS    += mainwindow.ui

@@ -3,6 +3,7 @@
 
 #include "zoommediator.h"
 #include "scribblemediator.h"
+#include "scribblemaskgenerator.h"
 #include <QMainWindow>
 #include <memory>
 
@@ -33,12 +34,15 @@ private slots:
 
     void enableDisableScribble();
 
+    void scribbleAdded(QGraphicsPathItem* pi);
+
 private:
     Ui::MainWindow* _ui;
     QGraphicsScene* _scene;
     QGraphicsPixmapItem* _imagePixmapItem;
     ZoomMediator* _zoomMediator;
     ScribbleMediator* _scribbleMediator;
+    ScribbleMaskGenerator _scribbleMaskGenerator;
 };
 
 #endif // MAINWINDOW_H

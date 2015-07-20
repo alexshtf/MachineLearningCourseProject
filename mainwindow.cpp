@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // allow the user to draw scribbles
     _scribbleMediator = new ScribbleMediator(_ui->graphicsView);
+    connect(_scribbleMediator, &ScribbleMediator::scribbleAdded, this, &MainWindow::scribbleAdded);
 
     // ensure that one of the image tools is active each time.
     QActionGroup* imageTools = new QActionGroup(this);
@@ -52,6 +53,7 @@ void MainWindow::on_actionOpenImage_triggered()
             clearAllScribbles();
             showPixmapFitInView(pixmap);
             enableDisableScribble();
+            _scribbleMaskGenerator.setSize(pixmap.size());
         }
         else
         {
@@ -131,4 +133,21 @@ void MainWindow::enableDisableScribble()
     }
     else
         _ui->actionScribble->setEnabled(true);
+}
+
+void MainWindow::scribbleAdded(QGraphicsPathItem *pi)
+{
+    // add scribble
+    _scribbleMaskGenerator.addScribble(pi->path());
+
+    // draw the scribble over the image
+    auto pixmap = _imagePixmapItem->pixmap();
+
+    QPainter painter(&pixmap);
+    painter.setPen(QPen(Qt::GlobalColor::blue, 4));
+
+    auto pixels = _scribbleMaskGenerator.getPixels();
+    painter.drawPoints(pixels.data(), pixels.size());
+
+    _imagePixmapItem->setPixmap(pixmap);
 }
