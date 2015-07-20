@@ -17,11 +17,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     zoommediator.cpp \
     scribblemediator.cpp \
-    scribblemaskgenerator.cpp
+    scribblemaskgenerator.cpp \
+    segmentationengine.cpp
 
 HEADERS  += mainwindow.h \
     zoommediator.h \
     scribblemediator.h \
-    scribblemaskgenerator.h
+    scribblemaskgenerator.h \
+    segmentationengine.h
 
 FORMS    += mainwindow.ui

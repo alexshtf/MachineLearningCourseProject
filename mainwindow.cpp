@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QGraphicsPixmapItem>
+#include <QPixmap>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -19,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // allow the user to draw scribbles
     _scribbleMediator = new ScribbleMediator(_ui->graphicsView);
-    connect(_scribbleMediator, &ScribbleMediator::scribbleAdded, this, &MainWindow::scribbleAdded);
+    connect(_scribbleMediator, &ScribbleMediator::scribbleAdded, this, &MainWindow::on_scribbleAdded);
 
     // ensure that one of the image tools is active each time.
     QActionGroup* imageTools = new QActionGroup(this);
@@ -53,7 +54,9 @@ void MainWindow::on_actionOpenImage_triggered()
             clearAllScribbles();
             showPixmapFitInView(pixmap);
             enableDisableScribble();
-            _scribbleMaskGenerator.setSize(pixmap.size());
+
+            setImageForSegmentation(pixmap);
+            displaySegmentation();
         }
         else
         {
@@ -66,20 +69,6 @@ void MainWindow::on_actionOpenImage_triggered()
     }
 }
 
-
-void MainWindow::clearAllScribbles()
-{
-    for(auto item : _ui->graphicsView->scene()->items())
-        if (item != _imagePixmapItem)
-            _ui->graphicsView->scene()->removeItem(item);
-}
-
-void MainWindow::showPixmapFitInView(QPixmap pixmap)
-{
-    _imagePixmapItem->setPixmap(pixmap);
-    _ui->graphicsView->scene()->setSceneRect(_imagePixmapItem->boundingRect());
-    _ui->graphicsView->fitInView(_imagePixmapItem);
-}
 
 void MainWindow::on_actionScribble_toggled(bool checked)
 {
@@ -123,6 +112,25 @@ void MainWindow::on_labelsTableWidget_itemSelectionChanged()
     }
 }
 
+void MainWindow::on_scribbleAdded(QGraphicsPathItem *pi)
+{
+    addScribbleToSegmentationEngine(pi);
+    displaySegmentation();
+}
+
+void MainWindow::clearAllScribbles()
+{
+    for(auto item : _ui->graphicsView->scene()->items())
+        if (item != _imagePixmapItem)
+            _ui->graphicsView->scene()->removeItem(item);
+}
+
+void MainWindow::showPixmapFitInView(QPixmap pixmap)
+{
+    _imagePixmapItem->setPixmap(pixmap);
+    _ui->graphicsView->scene()->setSceneRect(_imagePixmapItem->boundingRect());
+    _ui->graphicsView->fitInView(_imagePixmapItem);
+}
 
 void MainWindow::enableDisableScribble()
 {
@@ -135,19 +143,34 @@ void MainWindow::enableDisableScribble()
         _ui->actionScribble->setEnabled(true);
 }
 
-void MainWindow::scribbleAdded(QGraphicsPathItem *pi)
+void MainWindow::addScribbleToSegmentationEngine(QGraphicsPathItem *pi)
 {
-    // add scribble
-    _scribbleMaskGenerator.addScribble(pi->path());
+    for(auto item : _ui->labelsTableWidget->selectedItems())
+    {
+        auto labelId = item->row();
+        _segmentationEngine.addScribble(pi->path(), labelId);
+    }
+}
 
-    // draw the scribble over the image
-    auto pixmap = _imagePixmapItem->pixmap();
+void MainWindow::setImageForSegmentation(QPixmap pixmap)
+{
+    _segmentationEngine.reset(pixmap.toImage());
+}
 
+void MainWindow::displaySegmentation()
+{
+    QPixmap pixmap = _imagePixmapItem->pixmap();
     QPainter painter(&pixmap);
-    painter.setPen(QPen(Qt::GlobalColor::blue, 4));
+    for(auto label : _segmentationEngine.getLabels())
+    {
+        auto labelColor = _ui->labelsTableWidget->item(label, 0)->backgroundColor();
 
-    auto pixels = _scribbleMaskGenerator.getPixels();
-    painter.drawPoints(pixels.data(), pixels.size());
+        auto mask = _segmentationEngine.getMaskOf(label).toImage();
+        mask.setColor(0, qRgba(0, 0, 0, 0));
+        mask.setColor(1, qRgba(labelColor.red(), labelColor.green(), labelColor.blue(), 64));
+
+        painter.drawImage(0, 0, mask);
+    }
 
     _imagePixmapItem->setPixmap(pixmap);
 }

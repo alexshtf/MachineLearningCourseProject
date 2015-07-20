@@ -3,7 +3,7 @@
 
 #include "zoommediator.h"
 #include "scribblemediator.h"
-#include "scribblemaskgenerator.h"
+#include "segmentationengine.h"
 #include <QMainWindow>
 #include <memory>
 
@@ -32,17 +32,21 @@ private slots:
     void on_actionHand_toggled(bool arg1);
     void on_labelsTableWidget_itemSelectionChanged();
 
-    void enableDisableScribble();
-
-    void scribbleAdded(QGraphicsPathItem* pi);
+    void on_scribbleAdded(QGraphicsPathItem* pi);
 
 private:
+    void enableDisableScribble();
+    void addScribbleToSegmentationEngine(QGraphicsPathItem *pi);
+    void setImageForSegmentation(QPixmap pixmap);
+    void displaySegmentation();
+
     Ui::MainWindow* _ui;
     QGraphicsScene* _scene;
     QGraphicsPixmapItem* _imagePixmapItem;
+
     ZoomMediator* _zoomMediator;
     ScribbleMediator* _scribbleMediator;
-    ScribbleMaskGenerator _scribbleMaskGenerator;
+    SegmentationEngine _segmentationEngine;
 };
 
 #endif // MAINWINDOW_H
