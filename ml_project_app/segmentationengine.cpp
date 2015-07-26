@@ -6,7 +6,7 @@
 
 namespace {
 
-const size_t DESCRIPTOR_DIM = 9 * 3; // RGB color of 9-neighborhood of each pixel
+const size_t DESCRIPTOR_DIM = 25 * 3; // RGB color of a 5x5 neighborhood
 
 QMap<int, QVector<QPoint>> getLabelPixels(const QMap<int, ScribbleMaskGenerator>& generators)
 {
@@ -22,7 +22,7 @@ QColor rgbAt(const QImage& image, int x, int y)
     if (x >= image.width())
         x = 2 * image.width() - x - 1;
     if (y >= image.height())
-        y = 2 * image.height() - x - 1;
+        y = 2 * image.height() - y - 1;
 
     return QColor::fromRgb(image.pixel(std::abs(x), std::abs(y)));
 }
@@ -35,11 +35,11 @@ Common::PixelsLabelsArray computeDescriptors(const QImage& image)
         for(int y = 0; y < image.height(); ++y)
         {
             size_t l = 0;
-            for(int dx = 0; dx < 3; ++dx)
+            for(int dx = -2; dx <= 2; ++dx)
             {
-                for(int dy = 0; dy < 3; ++dy)
+                for(int dy = -2; dy <= 2; ++dy)
                 {
-                    auto rgb = rgbAt(image, x + dx - 1, y + dy - 1);
+                    auto rgb = rgbAt(image, x + dx, y + dy);
                     auto hsv = rgb.toHsv();
                     result.At(y, x, l + 0) = hsv.hueF();
                     result.At(y, x, l + 1) = hsv.saturationF();
