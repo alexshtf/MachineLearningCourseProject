@@ -11,8 +11,8 @@ public:
     void setSize(QSize size);
     void clear();
     void addScribble(const QPainterPath& path);
-    QBitmap getMask();
-    QVector<QPoint> getPixels();
+    QBitmap getMask() const;
+    QVector<QPoint> getPixels() const;
 
 private:
     QBitmap _bitmap;

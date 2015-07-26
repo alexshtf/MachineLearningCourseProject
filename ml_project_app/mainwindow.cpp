@@ -150,6 +150,7 @@ void MainWindow::addScribbleToSegmentationEngine(QGraphicsPathItem *pi)
         auto labelId = item->row();
         _segmentationEngine.addScribble(pi->path(), labelId);
     }
+    _segmentationEngine.recompute();
 }
 
 void MainWindow::setImageForSegmentation(QPixmap pixmap)

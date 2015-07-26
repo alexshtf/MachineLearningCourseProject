@@ -24,12 +24,12 @@ void ScribbleMaskGenerator::addScribble(const QPainterPath &path)
     painter.drawPath(path);
 }
 
-QBitmap ScribbleMaskGenerator::getMask()
+QBitmap ScribbleMaskGenerator::getMask() const
 {
     return _bitmap;
 }
 
-QVector<QPoint> ScribbleMaskGenerator::getPixels()
+QVector<QPoint> ScribbleMaskGenerator::getPixels() const
 {
     QVector<QPoint> result;
     for(QRect rect : QRegion(_bitmap).rects())
