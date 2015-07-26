@@ -20,7 +20,7 @@ public:
 private:
     QImage _image;
     Common::PixelsLabelsArray _descriptors;
-    Common::PixelsLabelsArray _segmentation;
+    Common::PixelsLabelsArray _similarity;
     QMap<int, QList<QPainterPath>> _scribbles;
     QMap<int, ScribbleMaskGenerator> _generators;
 };

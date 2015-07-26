@@ -39,10 +39,11 @@ Common::PixelsLabelsArray computeDescriptors(const QImage& image)
             {
                 for(int dy = 0; dy < 3; ++dy)
                 {
-                    auto rgb = rgbAt(image, x, y);
-                    result.At(y, x, l + 0) = rgb.redF();
-                    result.At(y, x, l + 1) = rgb.greenF();
-                    result.At(y, x, l + 2) = rgb.blueF();
+                    auto rgb = rgbAt(image, x + dx - 1, y + dy - 1);
+                    auto hsv = rgb.toHsv();
+                    result.At(y, x, l + 0) = hsv.hueF();
+                    result.At(y, x, l + 1) = hsv.saturationF();
+                    result.At(y, x, l + 2) = hsv.valueF();
 
                     l += 3;
                     assert(l <= DESCRIPTOR_DIM);
@@ -54,11 +55,12 @@ Common::PixelsLabelsArray computeDescriptors(const QImage& image)
     return result;
 }
 
-svm_parameter makeSvmParameter()
+svm_parameter makeSvmParameter(size_t labelsCount)
 {
     svm_parameter param = {};
     param.svm_type = C_SVC;
-    param.kernel_type = LINEAR;
+    param.kernel_type = RBF;
+    param.gamma = 1.0 / labelsCount;
     param.C = 1;
     param.cache_size = 10;
     param.eps = 0.001;
@@ -108,27 +110,31 @@ svm_problem makeSvmProblem(const Common::PixelsLabelsArray& descriptors, QMap<in
     return problem;
 }
 
-void updateSegmentation(Common::PixelsLabelsArray& segmentation, const Common::PixelsLabelsArray& descriptors, svm_model* model, int label)
+void fillSimilarity(Common::PixelsLabelsArray& similarity, const Common::PixelsLabelsArray& descriptors, svm_model* model, int label)
 {
     auto val = std::make_unique<svm_node[]>(descriptors.Labels() + 1);
     auto prob = std::make_unique<double[]>(2);
 
-    for(size_t c = 0; c < segmentation.Cols(); ++c)
+    int svmLabels[2];
+    svm_get_labels(model, svmLabels);
+    size_t idx = svmLabels[0] == 1 ? 0 : 1;
+
+    for(size_t c = 0; c < similarity.Cols(); ++c)
     {
-        for(size_t r = 0; r < segmentation.Rows(); ++r)
+        for(size_t r = 0; r < similarity.Rows(); ++r)
         {
             fillSvmNodes(val.get(), descriptors, r, c);
             svm_predict_probability(model, val.get(), prob.get());
-            segmentation.At(r, c, label) = prob[1];
+            similarity.At(r, c, label) = prob[idx];
         }
     }
 }
 
-int getMaxLabel(const Common::PixelsLabelsArray& segmentation, int x, int y)
+double getMaxValue(const Common::PixelsLabelsArray& segmentation, int x, int y)
 {
     auto* pixelLabels = &segmentation.At(y, x, 0);
     auto max = std::max_element(pixelLabels, pixelLabels + segmentation.Labels());
-    return max - pixelLabels;
+    return *max;
 }
 
 }
@@ -157,22 +163,22 @@ void SegmentationEngine::addScribble(QPainterPath path, int labelId)
 
 void SegmentationEngine::recompute()
 {
-    QMap<int, QVector<QPoint>> labelPixels = getLabelPixels(_generators);
-    _segmentation = Common::PixelsLabelsArray(_image.height(), _image.width(), labelPixels.keys().size());
-    if (_segmentation.Labels() <= 1) // we need at-least two labels to perform segmentation
+    _similarity = Common::PixelsLabelsArray(_image.height(), _image.width(), _generators.size());
+    if (_similarity.Labels() <= 1) // we need at-least two labels to perform segmentation
     {
-        std::fill(_segmentation.Data(), _segmentation.Data() + _segmentation.Size(), 0.0);
+        std::fill(_similarity.Data(), _similarity.Data() + _similarity.Size(), 0.0);
         return;
     }
 
+    QMap<int, QVector<QPoint>> labelPixels = getLabelPixels(_generators);
     for(auto label : labelPixels.keys())
     {
-        auto param = makeSvmParameter();
+        auto param = makeSvmParameter(labelPixels.size());
         auto prob = makeSvmProblem(_descriptors, labelPixels, label);
         if (!svm_check_parameter(&prob, &param))
         {
             auto model = svm_train(&prob, &param);
-            updateSegmentation(_segmentation, _descriptors, model, label);
+            fillSimilarity(_similarity, _descriptors, model, label);
             svm_free_and_destroy_model(&model);
         }
     }
@@ -187,7 +193,7 @@ QBitmap SegmentationEngine::getMaskOf(int labelId)
 {
     QBitmap bitmap(_image.width(), _image.height());
     bitmap.fill();
-    if (_segmentation.Labels() <= 1)
+    if (_similarity.Labels() <= 1)
         return bitmap;
 
     QPainter painter(&bitmap);
@@ -195,8 +201,8 @@ QBitmap SegmentationEngine::getMaskOf(int labelId)
     {
         for(int y = 0; y < bitmap.height(); ++y)
         {
-            auto maxLabel = getMaxLabel(_segmentation, x, y);
-            if (maxLabel == labelId)
+            auto maxValue = getMaxValue(_similarity, x, y);
+            if (_similarity.At(y, x, labelId) == maxValue)
                 painter.setPen(Qt::black);
             else
                 painter.setPen(Qt::white);
