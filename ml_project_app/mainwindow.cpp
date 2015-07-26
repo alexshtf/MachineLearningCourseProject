@@ -51,6 +51,8 @@ void MainWindow::on_actionOpenImage_triggered()
         QPixmap pixmap;
         if (pixmap.load(fileName))
         {
+            _segmentedImage = pixmap;
+
             clearAllScribbles();
             showPixmapFitInView(pixmap);
             enableDisableScribble();
@@ -160,17 +162,18 @@ void MainWindow::setImageForSegmentation(QPixmap pixmap)
 
 void MainWindow::displaySegmentation()
 {
-    QPixmap pixmap = _imagePixmapItem->pixmap();
+    auto pixmap = _segmentedImage.copy();
+
     QPainter painter(&pixmap);
     for(auto label : _segmentationEngine.getLabels())
     {
+        auto mask = _segmentationEngine.getMaskOf(label);
         auto labelColor = _ui->labelsTableWidget->item(label, 0)->backgroundColor();
 
-        auto mask = _segmentationEngine.getMaskOf(label).toImage();
-        mask.setColor(0, qRgba(0, 0, 0, 0));
-        mask.setColor(1, qRgba(labelColor.red(), labelColor.green(), labelColor.blue(), 64));
+        labelColor.setAlpha(64);
+        QBrush transparentBrush(labelColor, mask);
 
-        painter.drawImage(0, 0, mask);
+        painter.fillRect(pixmap.rect(), transparentBrush);
     }
 
     _imagePixmapItem->setPixmap(pixmap);

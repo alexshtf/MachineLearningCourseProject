@@ -136,6 +136,7 @@ int getMaxLabel(const Common::PixelsLabelsArray& segmentation, int x, int y)
 void SegmentationEngine::reset(QImage image)
 {
     _image = image;
+    _scribbles.clear();
     _generators.clear();
     _descriptors = computeDescriptors(_image);
 }

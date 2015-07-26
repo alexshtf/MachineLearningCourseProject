@@ -41,6 +41,7 @@ private:
     void displaySegmentation();
 
     Ui::MainWindow* _ui;
+    QPixmap _segmentedImage;
     QGraphicsScene* _scene;
     QGraphicsPixmapItem* _imagePixmapItem;
 
