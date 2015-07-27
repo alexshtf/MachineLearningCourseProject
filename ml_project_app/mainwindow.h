@@ -35,6 +35,8 @@ private slots:
 
     void on_scribbleAdded(QGraphicsPathItem* pi);
 
+    void on_addLabelButton_clicked();
+
 private:
     void enableDisableScribble();
     void addScribbleToSegmentationEngine(QGraphicsPathItem *pi);

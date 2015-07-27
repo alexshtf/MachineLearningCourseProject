@@ -13,7 +13,7 @@ TEMPLATE = app
 
 CONFIG += c++11
 CONFIG += ltcg
-CONFIG += simd
+
 
 
 SOURCES += main.cpp\

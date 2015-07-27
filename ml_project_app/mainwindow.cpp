@@ -5,6 +5,21 @@
 #include <QMessageBox>
 #include <QGraphicsPixmapItem>
 #include <QPixmap>
+#include <random>
+
+namespace {
+
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_int_distribution<> hDist(0, 359);
+std::uniform_int_distribution<> sDist(0, 255);
+
+QColor getRandomColor()
+{
+    return QColor::fromHsv(hDist(gen), sDist(gen), 255);
+}
+
+}
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -189,4 +204,20 @@ void MainWindow::displaySegmentation()
     }
 
     _imagePixmapItem->setPixmap(pixmap);
+}
+
+void MainWindow::on_addLabelButton_clicked()
+{
+    auto row = _ui->labelsTableWidget->rowCount();
+
+    _ui->labelsTableWidget->insertRow(row);
+
+    auto backgroundItem = new QTableWidgetItem;
+    backgroundItem->setBackgroundColor(getRandomColor());
+    backgroundItem->setFlags(Qt::ItemIsEnabled);
+    _ui->labelsTableWidget->setItem(row, 0, backgroundItem);
+
+    auto nameItem = new QTableWidgetItem(QString("Label %1").arg(row + 1));
+    nameItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
+    _ui->labelsTableWidget->setItem(row, 1, nameItem);
 }
