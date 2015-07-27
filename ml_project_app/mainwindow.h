@@ -30,6 +30,7 @@ private slots:
     void on_actionScribble_toggled(bool checked);
     void on_actionErase_toggled(bool arg1);
     void on_actionHand_toggled(bool arg1);
+    void on_actionSaveSimilarityMap_triggered();
     void on_labelsTableWidget_itemSelectionChanged();
 
     void on_scribbleAdded(QGraphicsPathItem* pi);

@@ -17,6 +17,8 @@ public:
     QList<int> getLabels();
     QBitmap getMaskOf(int labelId);
 
+    void saveSimilarity(const QString& fileName);
+
 private:
     QImage _image;
     Common::PixelsLabelsArray _descriptors;

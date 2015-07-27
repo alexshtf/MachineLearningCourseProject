@@ -1,6 +1,7 @@
 #include "segmentationengine.h"
 #include "scribblemaskgenerator.h"
 #include "svm.h"
+#include "PixelsLabelsArray.BIF.h"
 #include <QPainter>
 #include <cassert>
 
@@ -212,4 +213,9 @@ QBitmap SegmentationEngine::getMaskOf(int labelId)
     }
 
     return bitmap;
+}
+
+void SegmentationEngine::saveSimilarity(const QString &fileName)
+{
+    Common::SaveBIF(_similarity, fileName.toStdWString());
 }

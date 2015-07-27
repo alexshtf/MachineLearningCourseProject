@@ -102,6 +102,18 @@ void MainWindow::on_actionHand_toggled(bool checked)
     }
 }
 
+void MainWindow::on_actionSaveSimilarityMap_triggered()
+{
+    auto fileName = QFileDialog::getSaveFileName(
+        this,
+        tr("Open image"),
+        QString(),
+        tr("Binary Interleaved Format (*.bif);;All files (*.*)")
+    );
+    if (!fileName.isEmpty())
+        _segmentationEngine.saveSimilarity(fileName);
+}
+
 void MainWindow::on_labelsTableWidget_itemSelectionChanged()
 {
     enableDisableScribble();
