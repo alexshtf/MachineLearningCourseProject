@@ -129,6 +129,12 @@ void MainWindow::on_actionSaveSimilarityMap_triggered()
         _segmentationEngine.saveSimilarity(fileName);
 }
 
+void MainWindow::on_actionRecompute_triggered()
+{
+    _segmentationEngine.recompute();
+    displaySegmentation();
+}
+
 void MainWindow::on_labelsTableWidget_itemSelectionChanged()
 {
     enableDisableScribble();
@@ -144,7 +150,6 @@ void MainWindow::on_labelsTableWidget_itemSelectionChanged()
 void MainWindow::on_scribbleAdded(QGraphicsPathItem *pi)
 {
     addScribbleToSegmentationEngine(pi);
-    displaySegmentation();
 }
 
 void MainWindow::clearAllScribbles()
@@ -179,7 +184,6 @@ void MainWindow::addScribbleToSegmentationEngine(QGraphicsPathItem *pi)
         auto labelId = item->row();
         _segmentationEngine.addScribble(pi->path(), labelId);
     }
-    _segmentationEngine.recompute();
 }
 
 void MainWindow::setImageForSegmentation(QPixmap pixmap)

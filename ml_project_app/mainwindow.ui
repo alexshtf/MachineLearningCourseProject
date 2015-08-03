@@ -55,7 +55,7 @@
           <enum>Qt::SolidLine</enum>
          </property>
          <attribute name="horizontalHeaderVisible">
-          <bool>true</bool>
+          <bool>false</bool>
          </attribute>
          <attribute name="verticalHeaderVisible">
           <bool>false</bool>
@@ -212,6 +212,7 @@
    <addaction name="actionScribble"/>
    <addaction name="actionErase"/>
    <addaction name="separator"/>
+   <addaction name="actionRecompute"/>
    <addaction name="actionSaveSimilarityMap"/>
   </widget>
   <action name="actionOpenImage">
@@ -261,6 +262,11 @@
   <action name="actionSaveSimilarityMap">
    <property name="text">
     <string>Save similarity map</string>
+   </property>
+  </action>
+  <action name="actionRecompute">
+   <property name="text">
+    <string>Recompute</string>
    </property>
   </action>
  </widget>
