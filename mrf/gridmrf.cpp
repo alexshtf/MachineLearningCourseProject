@@ -1,0 +1,63 @@
+#include "gridmrf.h"
+#include "hashtableview.h"
+
+
+struct GridMRF::CellTraits
+{
+    typedef Pixel Key;
+    typedef EdgeCell Cell;
+
+    static size_t hash(const Pixel& pixel) { return pixel.hash(); }
+    static bool empty(const Cell& cell) { return cell.empty; }
+    static Pixel key(const Cell& cell) { return cell.neighbor; }
+    static void occupy(Cell& cell, const Key& key)
+    {
+        if (cell.empty)
+        {
+            cell.empty = false;
+            cell.neighbor = key;
+        }
+    }
+};
+
+GridMRF::GridMRF(size_t rows, size_t cols, size_t labels, size_t neighborsCapacity)
+    : _rows(rows)
+    , _cols(cols)
+    , _labels(labels)
+    , _neighborsCapacity(neighborsCapacity)
+    , _unary(rows, cols, labels)
+    , _edges(rows * cols * neighborsCapacity)
+{
+}
+
+void GridMRF::setUnary(Pixel pixel, size_t label, double value)
+{
+    _unary.At(pixel.row(), pixel.col(), label) = value;
+}
+
+void GridMRF::setPairwise(Pixel pixel1, Pixel pixel2, double value)
+{
+    CellsHashTable neighbors1(edgesPtrOf(pixel1), _neighborsCapacity);
+    CellsHashTable neighbors2(edgesPtrOf(pixel2), _neighborsCapacity);
+
+    auto edge12 = neighbors1.occupy(pixel2);
+    auto edge21 = neighbors2.occupy(pixel1);
+
+    edge12->potential = value;
+    edge21->potential = value;
+}
+
+double GridMRF::getUnary(Pixel pixel, size_t label) const
+{
+    return _unary.At(pixel.row(), pixel.col(), label);
+}
+
+double GridMRF::getPairwise(Pixel pixel1, Pixel pixel2, size_t label1, size_t label2) const
+{
+    if (label1 == label2)
+        return 0;
+
+    ConstCellsHashTable neighbors(edgesPtrOf(pixel1), _neighborsCapacity);
+    auto edge = neighbors.find(pixel2);
+    return edge->potential;
+}
