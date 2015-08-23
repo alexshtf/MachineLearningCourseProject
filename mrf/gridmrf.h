@@ -40,13 +40,21 @@ private:
 class GridMRF
 {
 public:
-    GridMRF(size_t rows, size_t cols, size_t labels, size_t neighbors);
+    GridMRF(size_t rows, size_t cols, size_t labels, size_t neighborsCapacity);
 
+    // potential setters
     void setUnary(Pixel pixel, size_t label, double value);
     void setPairwise(Pixel pixel1, Pixel pixel2, double value);
 
+    // potential queries
     double getUnary(Pixel pixel, size_t label) const;
     double getPairwise(Pixel pixel1, Pixel pixel2, size_t label1, size_t label2) const;
+
+    // dimensions
+    size_t cols() const { return _cols; }
+    size_t rows() const { return _rows; }
+    size_t labels() const { return _labels; }
+    size_t neighborsCapacity() const { return _neighborsCapacity; }
 private:
     struct EdgeCell
     {
