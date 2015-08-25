@@ -11,12 +11,14 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 SOURCES += \
-    gridmrf.cpp
+    gridmrf.cpp \
+    mrfmap.cpp
 
 HEADERS += \
     gridmrf.h \
     hashtableview.h \
-    hashtableview_fwd.h
+    hashtableview_fwd.h \
+    mrfmap.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
