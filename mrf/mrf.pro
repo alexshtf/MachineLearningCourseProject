@@ -9,6 +9,8 @@ QT       -= core gui
 TARGET = mrf
 TEMPLATE = lib
 CONFIG += staticlib
+CONFIG += ltcg
+CONFIG += c++14
 
 SOURCES += \
     gridmrf.cpp \

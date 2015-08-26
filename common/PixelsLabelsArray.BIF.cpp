@@ -45,15 +45,15 @@ namespace Common
 	}
 
 
-void SaveBIF(const PixelsLabelsArray& pla, const std::wstring& fileName)
+void SaveBIF(const PixelsLabelsArray& pla, const std::string& fileName)
 {
-	std::ofstream os(fileName, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
+    std::ofstream os(fileName, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
 	SaveBIF(pla, os);
 }
 
-PixelsLabelsArray LoadBIF(const std::wstring& fileName)
+PixelsLabelsArray LoadBIF(const std::string& fileName)
 {
-	std::ifstream is(fileName, std::ios_base::in | std::ios_base::binary);
+    std::ifstream is(fileName, std::ios_base::in | std::ios_base::binary);
 	return LoadBIF(is);
 }
 

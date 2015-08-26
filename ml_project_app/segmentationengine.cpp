@@ -217,5 +217,5 @@ QBitmap SegmentationEngine::getMaskOf(int labelId)
 
 void SegmentationEngine::saveSimilarity(const QString &fileName)
 {
-    Common::SaveBIF(_similarity, fileName.toStdWString());
+    Common::SaveBIF(_similarity, fileName.toStdString());
 }

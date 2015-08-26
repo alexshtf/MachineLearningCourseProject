@@ -11,8 +11,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ml_project
 TEMPLATE = app
 
-CONFIG += c++11
+CONFIG += c++14
 CONFIG += ltcg
+CONFIG += warn_off
 
 
 

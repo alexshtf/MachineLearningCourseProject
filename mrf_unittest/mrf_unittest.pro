@@ -2,6 +2,8 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
+CONFIG += ltcg
+CONFIG += c++14
 
 SOURCES += main.cpp \
     gridmrf.spec.cpp

@@ -1,7 +1,6 @@
 TEMPLATE = subdirs
 
 CONFIG += ordered
-CONFIG += ltcg
 
 SUBDIRS += libsvm \
     common \
