@@ -61,3 +61,22 @@ double GridMRF::getPairwise(Pixel pixel1, Pixel pixel2, size_t label1, size_t la
     auto edge = neighbors.find(pixel2);
     return edge->potential;
 }
+
+double GridMRF::getPairwise(size_t edgeIndex, size_t label1, size_t label2) const
+{
+    if (label1 == label2)
+        return 0;
+
+    auto origin = _edges.origin();
+    return origin[edgeIndex].potential;
+}
+
+boost::iterator_range<GridMRF::NeighborIterator> GridMRF::neighbors(const Pixel &pixel)
+{
+    auto origin = _edges.origin();
+    auto offset = edgesPtrOf(pixel) - origin;
+    NeighborIterator begin(origin, _neighborsCapacity, offset);
+    NeighborIterator end(origin, 0, offset + _neighborsCapacity);
+
+    return boost::make_iterator_range(begin, end);
+}
