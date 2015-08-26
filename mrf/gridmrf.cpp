@@ -70,10 +70,10 @@ double GridMRF::getPairwise(size_t edgeIndex, size_t label1, size_t label2) cons
     return origin[edgeIndex].potential;
 }
 
-std::vector<size_t> GridMRF::getEdgeIndices() const
+std::vector<EdgeInfo> GridMRF::getEdges() const
 {
     // get a vector of all edges
-    std::vector<std::pair<EdgePixels, size_t>> edges;
+    std::vector<EdgeInfo> edges;
     for(size_t i = 0; i < _edges.num_elements(); ++i)
     {
         // skip empty edges
@@ -83,23 +83,24 @@ std::vector<size_t> GridMRF::getEdgeIndices() const
         edges.emplace_back(getEdgeKey(i), i);
     }
 
-    // remove duplicate edges (each edge appears twice)
-    // and ensure that the lower index is used
-    auto idxLess = [] (const auto& l, const auto& r) { return l.second < r.second; };
-    auto keyLess = [] (const auto& l, const auto& r) { return l.first < r.first; };
-    auto keyEq = [] (const auto& l, const auto& r) { return l.first == r.first; };
+    // sort by pixels and then by index
+    auto idxLess = [] (const auto& l, const auto& r) { return l.index < r.index; };
+    auto descLess = [] (const auto& l, const auto& r) { return l.desc < r.desc; };
     std::sort(begin(edges), end(edges), idxLess);
-    std::stable_sort(begin(edges), end(edges), keyLess);
-    auto uniqueEnd = std::unique(begin(edges), end(edges), keyEq);
+    std::stable_sort(begin(edges), end(edges), descLess);
 
-    // extract edge indices
-    std::vector<size_t> indices(uniqueEnd - begin(edges));
-    std::transform(begin(edges), uniqueEnd, begin(indices),[] (const auto& e) { return e.second; });
-    std::sort(begin(indices), end(indices));
-    return indices;
+    // remove edges with duplicate keys - stable-sorting above ensures
+    // that the lowest index for each edge is used
+    auto descEq = [] (const auto& l, const auto& r) { return l.desc == r.desc; };
+    auto uniqueEnd = std::unique(begin(edges), end(edges), descEq);
+    edges.erase(uniqueEnd, end(edges));
+
+    // sort edges by index and return them
+    std::sort(begin(edges), end(edges), idxLess);
+    return edges;
 }
 
-EdgePixels GridMRF::getEdgeKey(size_t edgeIndex) const
+EdgeDesc GridMRF::getEdgeKey(size_t edgeIndex) const
 {
     size_t rowStride = _cols * _neighborsCapacity;
     size_t colStride = _neighborsCapacity;
@@ -107,7 +108,7 @@ EdgePixels GridMRF::getEdgeKey(size_t edgeIndex) const
          edgeIndex / rowStride,
          (edgeIndex % rowStride) / colStride);
     auto& to = (_edges.origin() + edgeIndex)->neighbor;
-    return EdgePixels(from, to);
+    return EdgeDesc(from, to);
 }
 
 boost::iterator_range<GridMRF::NeighborIterator> GridMRF::neighbors(const Pixel &pixel)

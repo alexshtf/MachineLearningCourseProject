@@ -11,6 +11,18 @@
 
 #include <iterator>
 
+struct EdgeInfo
+{
+    EdgeDesc desc;
+    size_t index;
+
+    EdgeInfo() = default;
+    EdgeInfo(EdgeDesc pixels, size_t index)
+        : desc(pixels)
+        , index(index)
+    {}
+};
+
 class GridMRF
 {
 public:
@@ -26,8 +38,8 @@ public:
     double getPairwise(size_t edgeIndex, size_t label1, size_t label2) const;
 
     // edge queries
-    std::vector<size_t> getEdgeIndices() const;
-    EdgePixels getEdgeKey(size_t edgeIndex) const;
+    std::vector<EdgeInfo> getEdges() const;
+    EdgeDesc getEdgeKey(size_t edgeIndex) const;
 
     // dimensions
     size_t cols() const { return _cols; }
@@ -46,6 +58,7 @@ private:
     };
 
 public:
+
 
     struct NeighborIterator : public std::iterator<std::forward_iterator_tag, Pixel>
     {

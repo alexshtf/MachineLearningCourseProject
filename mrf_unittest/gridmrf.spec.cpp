@@ -82,15 +82,17 @@ SCENARIO("Grid MRF stores a graph and potentials for unequal labels")
 
             AND_WHEN("All edges are enumerated")
             {
-                auto indices = mrf.getEdgeIndices();
+                auto edges = mrf.getEdges();
 
                 THEN("The two expected edges are returned")
                 {
-                    REQUIRE(std::is_sorted(begin(indices), end(indices)));
-                    REQUIRE(indices.size() == 2);
+                    REQUIRE(edges.size() == 2);
 
-                    REQUIRE(mrf.getEdgeKey(indices.at(0)) == EdgePixels(pixel1, pixel2));
-                    REQUIRE(mrf.getEdgeKey(indices.at(1)) == EdgePixels(pixel1, pixel3));
+                    auto idxLess = [] (const auto& l, const auto& r) { return l.index < r.index; };
+                    REQUIRE(std::is_sorted(begin(edges), end(edges), idxLess));
+
+                    REQUIRE(edges.at(0).desc == EdgeDesc(pixel1, pixel2));
+                    REQUIRE(edges.at(1).desc == EdgeDesc(pixel1, pixel3));
                 }
             }
 
