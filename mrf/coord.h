@@ -33,10 +33,10 @@ private:
     size_t _col;
 };
 
-class EdgeKey
+class EdgePixels
 {
 public:
-    EdgeKey(Pixel left, Pixel right)
+    EdgePixels(Pixel left, Pixel right)
     {
         std::tie(_first, _second) = std::minmax(left, right);
     }
@@ -44,8 +44,8 @@ public:
     const Pixel& first() const { return _first; }
     const Pixel& second() const { return _second; }
 
-    bool operator==(const EdgeKey& other) const { return tie() == other.tie(); }
-    bool operator<(const EdgeKey& other) const { return tie() < other.tie(); }
+    bool operator==(const EdgePixels& other) const { return tie() == other.tie(); }
+    bool operator<(const EdgePixels& other) const { return tie() < other.tie(); }
 
     size_t hash() const
     {
@@ -70,6 +70,15 @@ inline std::ostream& operator<<(std::ostream& os, const Pixel& pixel)
     return os;
 }
 
+inline std::ostream& operator<<(std::ostream& os, const EdgePixels& edgeKey)
+{
+    os << "EdgeKey"
+          " { first = " << edgeKey.first() <<
+          " , second = " << edgeKey.second() <<
+          " }";
+    return os;
+}
+
 namespace std
 {
     template<> struct hash<Pixel>
@@ -77,9 +86,9 @@ namespace std
         size_t operator()(const Pixel& pixel) { return pixel.hash(); }
     };
 
-    template<> struct hash<EdgeKey>
+    template<> struct hash<EdgePixels>
     {
-        size_t operator()(const EdgeKey& edgeKey) { return edgeKey.hash(); }
+        size_t operator()(const EdgePixels& edgeKey) { return edgeKey.hash(); }
     };
 }
 

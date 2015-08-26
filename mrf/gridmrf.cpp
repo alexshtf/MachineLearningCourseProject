@@ -1,7 +1,6 @@
 #include "gridmrf.h"
 #include "hashtableview.h"
 
-
 struct GridMRF::CellTraits
 {
     typedef Pixel Key;
@@ -69,6 +68,46 @@ double GridMRF::getPairwise(size_t edgeIndex, size_t label1, size_t label2) cons
 
     auto origin = _edges.origin();
     return origin[edgeIndex].potential;
+}
+
+std::vector<size_t> GridMRF::getEdgeIndices() const
+{
+    // get a vector of all edges
+    std::vector<std::pair<EdgePixels, size_t>> edges;
+    for(size_t i = 0; i < _edges.num_elements(); ++i)
+    {
+        // skip empty edges
+        if ((_edges.origin() + i)->empty)
+            continue;
+
+        edges.emplace_back(getEdgeKey(i), i);
+    }
+
+    // remove duplicate edges (each edge appears twice)
+    // and ensure that the lower index is used
+    auto idxLess = [] (const auto& l, const auto& r) { return l.second < r.second; };
+    auto keyLess = [] (const auto& l, const auto& r) { return l.first < r.first; };
+    auto keyEq = [] (const auto& l, const auto& r) { return l.first == r.first; };
+    std::sort(begin(edges), end(edges), idxLess);
+    std::stable_sort(begin(edges), end(edges), keyLess);
+    auto uniqueEnd = std::unique(begin(edges), end(edges), keyEq);
+
+    // extract edge indices
+    std::vector<size_t> indices(uniqueEnd - begin(edges));
+    std::transform(begin(edges), uniqueEnd, begin(indices),[] (const auto& e) { return e.second; });
+    std::sort(begin(indices), end(indices));
+    return indices;
+}
+
+EdgePixels GridMRF::getEdgeKey(size_t edgeIndex) const
+{
+    size_t rowStride = _cols * _neighborsCapacity;
+    size_t colStride = _neighborsCapacity;
+    Pixel from(
+         edgeIndex / rowStride,
+         (edgeIndex % rowStride) / colStride);
+    auto& to = (_edges.origin() + edgeIndex)->neighbor;
+    return EdgePixels(from, to);
 }
 
 boost::iterator_range<GridMRF::NeighborIterator> GridMRF::neighbors(const Pixel &pixel)

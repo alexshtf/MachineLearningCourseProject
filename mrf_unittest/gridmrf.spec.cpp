@@ -46,7 +46,7 @@ SCENARIO("Grid MRF stores a graph and potentials for unequal labels")
             }
         }
 
-        WHEN("Pairwise potentials are stored")
+        WHEN("Two pairwise potentials are stored")
         {
             Pixel pixel1(2, 1);
             Pixel pixel2(2, 2);
@@ -79,6 +79,21 @@ SCENARIO("Grid MRF stores a graph and potentials for unequal labels")
                 REQUIRE(sorted(mrf.neighbors(pixel3)) == std::vector<Pixel>({ pixel1 }));
                 REQUIRE(sorted(mrf.neighbors(pixel4)) == std::vector<Pixel> {});
             }
+
+            AND_WHEN("All edges are enumerated")
+            {
+                auto indices = mrf.getEdgeIndices();
+
+                THEN("The two expected edges are returned")
+                {
+                    REQUIRE(std::is_sorted(begin(indices), end(indices)));
+                    REQUIRE(indices.size() == 2);
+
+                    REQUIRE(mrf.getEdgeKey(indices.at(0)) == EdgePixels(pixel1, pixel2));
+                    REQUIRE(mrf.getEdgeKey(indices.at(1)) == EdgePixels(pixel1, pixel3));
+                }
+            }
+
         }
     }
 }

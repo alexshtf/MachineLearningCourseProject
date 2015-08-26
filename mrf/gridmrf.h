@@ -25,6 +25,10 @@ public:
     double getPairwise(Pixel pixel1, Pixel pixel2, size_t label1, size_t label2) const;
     double getPairwise(size_t edgeIndex, size_t label1, size_t label2) const;
 
+    // edge queries
+    std::vector<size_t> getEdgeIndices() const;
+    EdgePixels getEdgeKey(size_t edgeIndex) const;
+
     // dimensions
     size_t cols() const { return _cols; }
     size_t rows() const { return _rows; }
