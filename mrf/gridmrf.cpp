@@ -26,7 +26,7 @@ GridMRF::GridMRF(size_t rows, size_t cols, size_t labels, size_t neighborsCapaci
     , _labels(labels)
     , _neighborsCapacity(neighborsCapacity)
     , _unary(rows, cols, labels)
-    , _edges(rows * cols * neighborsCapacity)
+    , _edges(boost::extents[rows][cols][neighborsCapacity])
 {
 }
 

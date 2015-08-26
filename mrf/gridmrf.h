@@ -6,6 +6,7 @@
 
 #define BOOST_HASH_NO_EXTENSIONS
 #include <boost/functional/hash/hash.hpp>
+#include <boost/multi_array.hpp>
 #include <tuple>
 #include <vector>
 
@@ -68,9 +69,8 @@ private:
     typedef HashTableView<EdgeCell, CellTraits> CellsHashTable;
     typedef HashTableView<const EdgeCell, CellTraits> ConstCellsHashTable;
 
-    size_t edgesIndexOf(Pixel pixel) const { return pixel.col() * (_rows * _neighborsCapacity) + pixel.row() * _neighborsCapacity; }
-    EdgeCell* edgesPtrOf(Pixel pixel) { return &_edges[edgesIndexOf(pixel)]; }
-    const EdgeCell* edgesPtrOf(Pixel pixel) const { return &_edges[edgesIndexOf(pixel)]; }
+    EdgeCell* edgesPtrOf(Pixel pixel) { return &_edges[pixel.row()][pixel.col()][0]; }
+    const EdgeCell* edgesPtrOf(Pixel pixel) const { return &_edges[pixel.row()][pixel.col()][0]; }
 
     size_t _rows;
     size_t _cols;
@@ -78,7 +78,7 @@ private:
     size_t _neighborsCapacity;
 
     Common::PixelsLabelsArray _unary;
-    std::vector<EdgeCell> _edges;
+    boost::multi_array<EdgeCell, 3> _edges; // row x col x neighbors_capacity
 };
 
 #endif // GRIDMRF_H
