@@ -223,6 +223,7 @@ void SegmentationEngine::recompute()
         mrfMap.nextIteration();
     }
 
+    _segmentation.resize(boost::extents[mrf.rows()][mrf.cols()]);
     _segmentation = mrfMap.primal();
 }
 

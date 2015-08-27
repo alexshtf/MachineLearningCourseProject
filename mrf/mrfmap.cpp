@@ -7,7 +7,7 @@ namespace {
 
 size_t maxNumOfEdges(const GridMRF& mrf)
 {
-    return 1 + (mrf.rows() * mrf.cols() * mrf.neighborsCapacity() / 2);
+    return mrf.rows() * mrf.cols() * mrf.neighborsCapacity();
 }
 
 }
