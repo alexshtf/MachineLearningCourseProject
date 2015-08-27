@@ -34,6 +34,13 @@ void GridMRF::setUnary(Pixel pixel, size_t label, double value)
     _unary.At(pixel.row(), pixel.col(), label) = value;
 }
 
+void GridMRF::setUnary(Pixel pixel, std::initializer_list<double> values)
+{
+    size_t i = 0;
+    for(auto& val : values)
+        setUnary(pixel, i++, val);
+}
+
 void GridMRF::setPairwise(Pixel pixel1, Pixel pixel2, double value)
 {
     CellsHashTable neighbors1(edgesPtrOf(pixel1), _neighborsCapacity);

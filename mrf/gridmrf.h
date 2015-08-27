@@ -30,6 +30,7 @@ public:
 
     // potential setters
     void setUnary(Pixel pixel, size_t label, double value);
+    void setUnary(Pixel pixel, std::initializer_list<double> values);
     void setPairwise(Pixel pixel1, Pixel pixel2, double value);
 
     // potential queries

@@ -6,7 +6,8 @@ CONFIG += ltcg
 CONFIG += c++14
 
 SOURCES += main.cpp \
-    gridmrf.spec.cpp
+    gridmrf.spec.cpp \
+    mrfmap.spec.cpp
 
 INCLUDEPATH += $$PWD/../catch
 INCLUDEPATH += $$PWD/../boost-libs/include
