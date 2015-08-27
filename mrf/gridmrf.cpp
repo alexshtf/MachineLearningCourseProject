@@ -107,6 +107,15 @@ std::vector<EdgeInfo> GridMRF::getEdges() const
     return edges;
 }
 
+EdgeInfo GridMRF::getEdgeInfo(const Pixel &from, const Pixel &to) const
+{
+    EdgeDesc desc(from, to);
+    auto edge = ConstCellsHashTable(edgesPtrOf(desc.first()), _neighborsCapacity).find(desc.second());
+    auto idx = edge - _edges.origin();
+
+    return EdgeInfo(desc, idx);
+}
+
 EdgeDesc GridMRF::getEdgeKey(size_t edgeIndex) const
 {
     size_t rowStride = _cols * _neighborsCapacity;
@@ -118,7 +127,7 @@ EdgeDesc GridMRF::getEdgeKey(size_t edgeIndex) const
     return EdgeDesc(from, to);
 }
 
-boost::iterator_range<GridMRF::NeighborIterator> GridMRF::neighbors(const Pixel &pixel)
+boost::iterator_range<GridMRF::NeighborIterator> GridMRF::neighbors(const Pixel &pixel) const
 {
     auto origin = _edges.origin();
     auto offset = edgesPtrOf(pixel) - origin;

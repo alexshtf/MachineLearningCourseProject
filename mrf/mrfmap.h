@@ -20,6 +20,8 @@ public:
 protected:
     void setPrimalVariablesToUnaryMinimizers();
     size_t primalAt(const Pixel& pixel) const;
+    double unaryMin(const Pixel& pixel) const;
+    double pairwiseMin(const EdgeInfo& edge) const;
 
     const GridMRF& _mrf;
     boost::multi_array<double, 3> _dualVariables; // Edges X 2 X Labels (since each edge is connected to two pixels)

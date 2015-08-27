@@ -7,7 +7,7 @@ namespace {
 
 size_t maxNumOfEdges(const GridMRF& mrf)
 {
-    return mrf.rows() * mrf.cols() * mrf.neighborsCapacity();
+    return 1 + (mrf.rows() * mrf.cols() * mrf.neighborsCapacity() / 2);
 }
 
 }
@@ -29,7 +29,7 @@ double MRFMap::computePrimalEnergy() const
             sum += _mrf.getUnary(Pixel(r, c), _primalVariables[r][c]);
 
     // accumulate pairwise potentials
-    for(const EdgeInfo& edge : _mrf.getEdges())
+    for(const auto& edge : _mrf.getEdges())
     {
         auto& pix1 = edge.desc.first();
         auto& pix2 = edge.desc.second();
@@ -41,7 +41,18 @@ double MRFMap::computePrimalEnergy() const
 
 double MRFMap::computeDualEnergy() const
 {
-    return 0;
+    auto sum = 0.0;
+
+    // accumulate unary minima
+    for(size_t r = 0; r < _mrf.rows(); ++r)
+        for(size_t c = 0; c < _mrf.cols(); ++c)
+            sum += unaryMin(Pixel(r, c));
+
+    // accumulaty pairwise minima
+    for(const auto& edge : _mrf.getEdges())
+        sum += pairwiseMin(edge);
+
+    return sum;
 }
 
 void MRFMap::init()
@@ -68,4 +79,50 @@ void MRFMap::setPrimalVariablesToUnaryMinimizers()
 size_t MRFMap::primalAt(const Pixel &pixel) const
 {
     return _primalVariables[pixel.row()][pixel.col()];
+}
+
+double MRFMap::unaryMin(const Pixel &pixel) const
+{
+    double minEnergy = std::numeric_limits<double>::max();
+
+    for(size_t l = 0; l < _mrf.labels(); ++l)
+    {
+        // compute local energy
+        double energy = _mrf.getUnary(pixel, l);
+        for(const auto& neighbor : _mrf.neighbors(pixel))
+        {
+            auto edgeInfo = _mrf.getEdgeInfo(pixel, neighbor);
+            auto pixelIndex = pixel == edgeInfo.desc.first() ? 0 : 1;
+            energy += _dualVariables[edgeInfo.index][pixelIndex][l];
+        }
+
+        // update minimum
+        if (energy < minEnergy)
+            minEnergy = energy;
+    }
+
+    return minEnergy;
+}
+
+double MRFMap::pairwiseMin(const EdgeInfo &edge) const
+{
+    double minEnergy = std::numeric_limits<double>::max();
+
+    for(size_t l1 = 0; l1 < _mrf.labels(); ++l1)
+    {
+        for(size_t l2 = 0; l2 < _mrf.labels(); ++l2)
+        {
+            // compute local energy
+            double energy
+                    = _mrf.getPairwise(edge.index, l1, l2)
+                    + _dualVariables[edge.index][0][l1]
+                    + _dualVariables[edge.index][1][l2];
+
+            // update minimum
+            if (energy < minEnergy)
+                minEnergy = energy;
+        }
+    }
+
+    return minEnergy;
 }

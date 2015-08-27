@@ -65,6 +65,11 @@ SCENARIO("MRF-MAP base class provides common services")
                         REQUIRE(mrfMap.computePrimalEnergy() == expectedEnergy);
                     }
                 }
+
+                THEN("Dual energy is below primal energy")
+                {
+                    REQUIRE(mrfMap.computePrimalEnergy() > mrfMap.computeDualEnergy());
+                }
             }
         }
 

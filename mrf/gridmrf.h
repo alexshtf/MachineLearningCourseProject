@@ -40,6 +40,7 @@ public:
 
     // edge queries
     std::vector<EdgeInfo> getEdges() const;
+    EdgeInfo getEdgeInfo(const Pixel& from, const Pixel& to) const;
     EdgeDesc getEdgeKey(size_t edgeIndex) const;
 
     // dimensions
@@ -80,7 +81,7 @@ public:
         bool operator!=(const NeighborIterator& other) { return tie() != other.tie(); }
 
     private:
-        NeighborIterator(EdgeCell* cells, size_t capacity, size_t offset)
+        NeighborIterator(const EdgeCell* cells, size_t capacity, size_t offset)
             : _cells(cells)
             , _capacity(capacity)
             , _offset(offset)
@@ -103,19 +104,19 @@ public:
             --_capacity;
         }
 
-        std::tuple<EdgeCell* const &, const size_t&, const size_t&> tie() const
+        std::tuple<const EdgeCell* const &, const size_t&, const size_t&> tie() const
         {
             return std::tie(_cells, _capacity, _offset);
         }
 
 
-        EdgeCell* _cells;
+        const EdgeCell* _cells;
         size_t _capacity;
         size_t _offset;
     };
 
     // iteration
-    boost::iterator_range<NeighborIterator> neighbors(const Pixel& pixel);
+    boost::iterator_range<NeighborIterator> neighbors(const Pixel& pixel) const;
 
 private:
 
