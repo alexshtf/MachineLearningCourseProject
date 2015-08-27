@@ -6,6 +6,7 @@
 #include <QPainterPath>
 #include <QList>
 #include <QMap>
+#include <boost/multi_array.hpp>
 
 class SegmentationEngine
 {
@@ -20,11 +21,14 @@ public:
     void saveSimilarity(const QString& fileName);
 
 private:
+    Common::PixelsLabelsArray computeSimilarity();
+    class GridMRF makeMrf(Common::PixelsLabelsArray similarity);
+
     QImage _image;
     Common::PixelsLabelsArray _descriptors;
-    Common::PixelsLabelsArray _similarity;
     QMap<int, QList<QPainterPath>> _scribbles;
     QMap<int, ScribbleMaskGenerator> _generators;
+    boost::multi_array<size_t, 2> _segmentation;
 };
 
 #endif // SEGMENTATIONENGINE_H

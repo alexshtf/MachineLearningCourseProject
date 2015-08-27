@@ -2,8 +2,13 @@
 #include "scribblemaskgenerator.h"
 #include "svm.h"
 #include "PixelsLabelsArray.BIF.h"
+#include "mrfmap.h"
+#include "gridmrf.h"
 #include <QPainter>
+#include <algorithm>
+#include <array>
 #include <cassert>
+#include <cmath>
 
 namespace {
 
@@ -59,6 +64,7 @@ Common::PixelsLabelsArray computeDescriptors(const QImage& image)
 svm_parameter makeSvmParameter(size_t labelsCount)
 {
     svm_parameter param = {};
+
     param.svm_type = C_SVC;
     param.kernel_type = RBF;
     param.gamma = 1.0 / labelsCount;
@@ -138,6 +144,45 @@ double getMaxValue(const Common::PixelsLabelsArray& segmentation, int x, int y)
     return *max;
 }
 
+
+struct FourNeighbors
+{
+    FourNeighbors(size_t rows, size_t cols)
+        : _rows(rows)
+        , _cols(cols)
+    {}
+
+    std::array<std::pair<Pixel, bool>, 4> of(const Pixel& pixel) const
+    {
+        std::array<std::pair<Pixel, bool>, 4> result = {};
+        size_t i = 0;
+
+        auto r = pixel.row();
+        auto c = pixel.col();
+
+        if (c > 0)
+            result[i++] = std::make_pair(Pixel(r, c - 1), true);
+        if (c < _cols - 1)
+            result[i++] = std::make_pair(Pixel(r, c + 1), true);
+        if (r > 0)
+            result[i++] = std::make_pair(Pixel(r - 1, c), true);
+        if (r < _rows - 1)
+            result[i++] = std::make_pair(Pixel(r + 1, c), true);
+
+        return result;
+    }
+
+    size_t _rows;
+    size_t _cols;
+};
+
+double dist(const Pixel& left, const Pixel& right)
+{
+    auto dr = left.row() - right.row();
+    auto dc = left.col() - right.col();
+    return std::sqrt(dr * dr + dc * dc);
+}
+
 }
 
 void SegmentationEngine::reset(QImage image)
@@ -164,25 +209,21 @@ void SegmentationEngine::addScribble(QPainterPath path, int labelId)
 
 void SegmentationEngine::recompute()
 {
-    _similarity = Common::PixelsLabelsArray(_image.height(), _image.width(), _generators.size());
-    if (_similarity.Labels() <= 1) // we need at-least two labels to perform segmentation
+    auto mrf = makeMrf(computeSimilarity());
+
+    EmptyMRFMap mrfMap(mrf);
+
+    mrfMap.init();
+    auto prevDualEnergy = std::numeric_limits<double>::min();
+    auto currDualEnergy = 0.0;
+    auto epsilon = 1E-5;
+    while (std::abs(prevDualEnergy - (currDualEnergy = mrfMap.computeDualEnergy())) < epsilon)
     {
-        std::fill(_similarity.Data(), _similarity.Data() + _similarity.Size(), 0.0);
-        return;
+        prevDualEnergy = currDualEnergy;
+        mrfMap.nextIteration();
     }
 
-    QMap<int, QVector<QPoint>> labelPixels = getLabelPixels(_generators);
-    for(auto label : labelPixels.keys())
-    {
-        auto param = makeSvmParameter(labelPixels.size());
-        auto prob = makeSvmProblem(_descriptors, labelPixels, label);
-        if (!svm_check_parameter(&prob, &param))
-        {
-            auto model = svm_train(&prob, &param);
-            fillSimilarity(_similarity, _descriptors, model, label);
-            svm_free_and_destroy_model(&model);
-        }
-    }
+    _segmentation = mrfMap.primal();
 }
 
 QList<int> SegmentationEngine::getLabels()
@@ -194,16 +235,13 @@ QBitmap SegmentationEngine::getMaskOf(int labelId)
 {
     QBitmap bitmap(_image.width(), _image.height());
     bitmap.fill();
-    if (_similarity.Labels() <= 1)
-        return bitmap;
 
     QPainter painter(&bitmap);
     for(int x = 0; x < bitmap.width(); ++x)
     {
         for(int y = 0; y < bitmap.height(); ++y)
         {
-            auto maxValue = getMaxValue(_similarity, x, y);
-            if (_similarity.At(y, x, labelId) == maxValue)
+            if (_segmentation[y][x] == labelId)
                 painter.setPen(Qt::black);
             else
                 painter.setPen(Qt::white);
@@ -217,5 +255,54 @@ QBitmap SegmentationEngine::getMaskOf(int labelId)
 
 void SegmentationEngine::saveSimilarity(const QString &fileName)
 {
-    Common::SaveBIF(_similarity, fileName.toStdString());
+    Common::SaveBIF(computeSimilarity(), fileName.toStdString());
+}
+
+Common::PixelsLabelsArray SegmentationEngine::computeSimilarity()
+{
+    auto similarity = Common::PixelsLabelsArray(_image.height(), _image.width(), _generators.size());
+    if (similarity.Labels() <= 1) // we need at-least two labels to perform segmentation
+    {
+        std::fill(similarity.Data(), similarity.Data() + similarity.Size(), 0.0);
+        return similarity;
+    }
+
+    QMap<int, QVector<QPoint>> labelPixels = getLabelPixels(_generators);
+    for(auto label : labelPixels.keys())
+    {
+        auto param = makeSvmParameter(labelPixels.size());
+        auto prob = makeSvmProblem(_descriptors, labelPixels, label);
+        if (!svm_check_parameter(&prob, &param))
+        {
+            auto model = svm_train(&prob, &param);
+            fillSimilarity(similarity, _descriptors, model, label);
+            svm_free_and_destroy_model(&model);
+        }
+    }
+
+    return similarity;
+}
+
+GridMRF SegmentationEngine::makeMrf(Common::PixelsLabelsArray similarity)
+{
+    GridMRF mrf(similarity.Rows(), similarity.Cols(), similarity.Labels(), 6);
+    mrf.setUnary(std::move(similarity));
+
+    // set pairwise potentials of 4-neighborhood
+    FourNeighbors fourNeighbors(mrf.rows(), mrf.cols());
+    for(size_t r = 0; r < mrf.rows(); ++r)
+    {
+        for(size_t c = 0; c < mrf.cols(); ++c)
+        {
+            Pixel p(r, c);
+            for(const auto& n : fourNeighbors.of(p))
+            {
+                if (!n.second)
+                    break;
+                mrf.setPairwise(p, n.first, dist(p, n.first));
+            }
+        }
+    }
+
+    return mrf;
 }

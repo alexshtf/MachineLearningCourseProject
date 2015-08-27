@@ -34,6 +34,15 @@ void GridMRF::setUnary(Pixel pixel, size_t label, double value)
     _unary.At(pixel.row(), pixel.col(), label) = value;
 }
 
+void GridMRF::setUnary(Common::PixelsLabelsArray values)
+{
+    assert(_unary.Rows() == values.Rows());
+    assert(_unary.Cols() == values.Cols());
+    assert(_unary.Labels() == values.Labels());
+
+    _unary = std::move(values);
+}
+
 void GridMRF::setUnary(Pixel pixel, std::initializer_list<double> values)
 {
     size_t i = 0;

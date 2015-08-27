@@ -21,7 +21,7 @@ HEADERS += \
     hashtableview.h \
     hashtableview_fwd.h \
     mrfmap.h \
-    coord.h 
+    coord.h  
 unix {
     target.path = /usr/lib
     INSTALLS += target

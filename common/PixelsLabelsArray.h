@@ -12,7 +12,7 @@ namespace Common
 	/************************************************************************/
 	class PixelsLabelsArray
 	{
-        typedef std::unique_ptr<double> DataPtr;
+        typedef std::unique_ptr<double[]> DataPtr;
 
 		size_t _labels;
 		size_t _rows;

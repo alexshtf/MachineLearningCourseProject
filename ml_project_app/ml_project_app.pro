@@ -32,6 +32,7 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui
 
+INCLUDEPATH += $$PWD/../boost-libs/include
 
 # libsvm
 
