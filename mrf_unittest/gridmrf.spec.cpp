@@ -56,6 +56,18 @@ SCENARIO("Grid MRF stores a graph and potentials for unequal labels")
             mrf.setPairwise(pixel1, pixel2, 17.0); // pixels 1 and 2 are connected, with pairwise potential of 17 for unequal labels
             mrf.setPairwise(pixel3, pixel1, 14.0); // pixels 1 and 3 are connected, with pairwise potential of 14 for unequal labels
 
+            AND_WHEN("Pairwise potentials are overwritten")
+            {
+                mrf.setPairwise(pixel1, pixel2, 27.0);
+                mrf.setPairwise(pixel3, pixel1, 24.0);
+
+                THEN("Retrieved potential is the latest")
+                {
+                    REQUIRE(mrf.getPairwise(pixel1, pixel2, 0, 1) == 27.0);
+                    REQUIRE(mrf.getPairwise(pixel3, pixel1, 0, 1) == 24.0);
+                }
+            }
+
             THEN("Retrieved potential for different labels is the stored one")
             {
                 // same label queries

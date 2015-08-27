@@ -23,7 +23,7 @@ public:
     Cell* occupy(const Key& key)
     {
         auto emptyCell = linearSearch(index(key), [&] (const Cell& cell) {
-           return empty(cell);
+           return empty(cell) || keyOf(cell) == key;
         });
         occupy(*emptyCell, key);
         return emptyCell;
