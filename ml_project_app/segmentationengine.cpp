@@ -4,6 +4,7 @@
 #include "PixelsLabelsArray.BIF.h"
 #include "mrfmap.h"
 #include "gridmrf.h"
+#include "neighborhoods.h"
 #include <QPainter>
 #include <algorithm>
 #include <array>
@@ -144,38 +145,6 @@ double getMaxValue(const Common::PixelsLabelsArray& segmentation, int x, int y)
     return *max;
 }
 
-
-struct FourNeighbors
-{
-    FourNeighbors(size_t rows, size_t cols)
-        : _rows(rows)
-        , _cols(cols)
-    {}
-
-    std::array<std::pair<Pixel, bool>, 4> of(const Pixel& pixel) const
-    {
-        std::array<std::pair<Pixel, bool>, 4> result = {};
-        size_t i = 0;
-
-        auto r = pixel.row();
-        auto c = pixel.col();
-
-        if (c > 0)
-            result[i++] = std::make_pair(Pixel(r, c - 1), true);
-        if (c < _cols - 1)
-            result[i++] = std::make_pair(Pixel(r, c + 1), true);
-        if (r > 0)
-            result[i++] = std::make_pair(Pixel(r - 1, c), true);
-        if (r < _rows - 1)
-            result[i++] = std::make_pair(Pixel(r + 1, c), true);
-
-        return result;
-    }
-
-    size_t _rows;
-    size_t _cols;
-};
-
 double dist(const Pixel& left, const Pixel& right)
 {
     auto dr = left.row() - right.row();
@@ -290,18 +259,13 @@ GridMRF SegmentationEngine::makeMrf(Common::PixelsLabelsArray similarity)
     mrf.setUnary(std::move(similarity));
 
     // set pairwise potentials of 4-neighborhood
-    FourNeighbors fourNeighbors(mrf.rows(), mrf.cols());
     for(size_t r = 0; r < mrf.rows(); ++r)
     {
         for(size_t c = 0; c < mrf.cols(); ++c)
         {
             Pixel p(r, c);
-            for(const auto& n : fourNeighbors.of(p))
-            {
-                if (!n.second)
-                    break;
-                mrf.setPairwise(p, n.first, dist(p, n.first));
-            }
+            for(const auto& n : FourNeighbors(mrf.rows(), mrf.cols(), p))
+                mrf.setPairwise(p, n, dist(p, n));
         }
     }
 

@@ -7,7 +7,8 @@ CONFIG += c++14
 
 SOURCES += main.cpp \
     gridmrf.spec.cpp \
-    mrfmap.spec.cpp
+    mrfmap.spec.cpp \
+    neighborhoods.spec.cpp
 
 INCLUDEPATH += $$PWD/../catch
 INCLUDEPATH += $$PWD/../boost-libs/include
