@@ -16,6 +16,7 @@ public:
     size_t col() const { return _col; }
 
     bool operator==(const Pixel& other) const { return tie() == other.tie(); }
+    bool operator!=(const Pixel& other) const { return tie() != other.tie(); }
     bool operator<(const Pixel& other) const { return tie() < other.tie(); }
 
     size_t hash() const

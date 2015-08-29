@@ -15,7 +15,8 @@ CONFIG += c++14
 SOURCES += \
     gridmrf.cpp \
     mrfmap.cpp \
-    neighborhoods.cpp
+    neighborhoods.cpp \
+    starupdatemrfmap.cpp
 
 HEADERS += \
     gridmrf.h \
@@ -23,7 +24,8 @@ HEADERS += \
     hashtableview_fwd.h \
     mrfmap.h \
     coord.h \  
-    neighborhoods.h
+    neighborhoods.h \
+    starupdatemrfmap.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

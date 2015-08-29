@@ -21,6 +21,7 @@ public:
 protected:
     void setPrimalVariablesToUnaryMinimizers();
     size_t primalAt(const Pixel& pixel) const;
+    double &dualAt(const EdgeDesc& edge, const Pixel& at, size_t label);
     double unaryMin(const Pixel& pixel) const;
     double pairwiseMin(const EdgeInfo& edge) const;
 

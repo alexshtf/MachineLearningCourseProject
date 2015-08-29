@@ -81,6 +81,13 @@ size_t MRFMap::primalAt(const Pixel &pixel) const
     return _primalVariables[pixel.row()][pixel.col()];
 }
 
+double& MRFMap::dualAt(const EdgeDesc &edge, const Pixel &at, size_t label)
+{
+    auto edgeInfo = _mrf.getEdgeInfo(edge.first(), edge.second());
+    auto pixelIdx = edgeInfo.desc.first() == at ? 0 : 1;
+    return _dualVariables[edgeInfo.index][pixelIdx][label];
+}
+
 double MRFMap::unaryMin(const Pixel &pixel) const
 {
     double minEnergy = std::numeric_limits<double>::max();
