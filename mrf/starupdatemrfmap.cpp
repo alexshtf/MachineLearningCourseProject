@@ -76,7 +76,7 @@ void StarUpdateMRFMap::starUpdate(const Pixel &pixel, work2d& deltaMinus, work1d
         const auto& nj = neighbors[j];
         for(auto xi : lsRng)
         {
-            dualAt(EdgeDesc(pixel, nj), pixel, xi) = -1.0/()
+            dualAt(EdgeDesc(pixel, nj), pixel, xi) = -1.0; // TODO: Write here
         }
     }
 }
