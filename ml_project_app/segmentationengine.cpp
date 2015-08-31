@@ -68,19 +68,20 @@ Common::PixelsLabelsArray computeDescriptors(const QImage& image, size_t neighbo
 
 }
 
-SegmentationEngine::SegmentationEngine(const Config &config, QObject *parent)
+SegmentationEngine::SegmentationEngine(const Config &config, ComputeSegmentationWorker *worker, QObject *parent)
     : QObject(parent)
     , _config(config)
+    , _worker(worker)
 {
-    _worker = new ComputeSegmentationWorker(config, this);
+    connect(this, &SegmentationEngine::compute, _worker, &ComputeSegmentationWorker::compute, Qt::QueuedConnection);
 
-    connect(_worker, &ComputeSegmentationWorker::startedRecompute, this, &SegmentationEngine::startedRecompute);
-    connect(_worker, &ComputeSegmentationWorker::trainedSVM, this, &SegmentationEngine::trainedSVM);
-    connect(_worker, &ComputeSegmentationWorker::computedSimilarity, this, &SegmentationEngine::computedSimilarity);
-    connect(_worker, &ComputeSegmentationWorker::createdMRF, this, &SegmentationEngine::createdMRF);
-    connect(_worker, &ComputeSegmentationWorker::mapInitialized, this, &SegmentationEngine::mapInitialized);
-    connect(_worker, &ComputeSegmentationWorker::iterationFinished, this, &SegmentationEngine::iterationFinished);
-    connect(_worker, &ComputeSegmentationWorker::recomputeDone, this, &SegmentationEngine::onRecomputeDone);
+    connect(_worker, &ComputeSegmentationWorker::startedRecompute, this, &SegmentationEngine::startedRecompute, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::trainedSVM, this, &SegmentationEngine::trainedSVM, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::computedSimilarity, this, &SegmentationEngine::computedSimilarity, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::createdMRF, this, &SegmentationEngine::createdMRF, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::mapInitialized, this, &SegmentationEngine::mapInitialized, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::iterationFinished, this, &SegmentationEngine::iterationFinished, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::recomputeDone, this, &SegmentationEngine::onRecomputeDone, Qt::QueuedConnection);
 }
 
 SegmentationEngine::~SegmentationEngine()
@@ -111,7 +112,7 @@ void SegmentationEngine::addScribble(QPainterPath path, int labelId)
 
 void SegmentationEngine::recompute()
 {
-    _worker->compute(_image, _descriptors, getLabelPixels(_generators));
+    emit compute(_image, _descriptors, getLabelPixels(_generators));
 }
 
 QList<int> SegmentationEngine::getLabels()

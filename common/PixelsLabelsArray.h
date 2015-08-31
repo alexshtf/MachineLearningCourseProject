@@ -40,6 +40,15 @@ namespace Common
 		{
 		}
 
+        PixelsLabelsArray(const PixelsLabelsArray& other)
+            : _labels(other._labels)
+            , _rows(other._rows)
+            , _cols(other._cols)
+            , _data(AllocateStorage(other._rows, other._cols, other._labels))
+        {
+            std::copy(Data(), Data() + Size(), const_cast<double*>(other.Data()));
+        }
+
 		PixelsLabelsArray(size_t rows, size_t cols, size_t labels)
 			: _labels(labels)
 			, _rows(rows)
@@ -55,7 +64,6 @@ namespace Common
 			return result;
 		}
 
-		PixelsLabelsArray(const PixelsLabelsArray& other) = delete;
 		PixelsLabelsArray& operator=(const PixelsLabelsArray&) = delete;
 		
 		

@@ -19,13 +19,12 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(class Config& config, QWidget *parent = 0);
+    explicit MainWindow(class Config& config, SegmentationEngine* segmentationEngine,  QWidget *parent = 0);
     ~MainWindow();
 
 private slots:
+    // events from the UI
     void on_actionOpenImage_triggered();
-    void clearAllScribbles();
-    void showPixmapFitInView(QPixmap pixmap);
 
     void on_actionScribble_toggled(bool checked);
     void on_actionErase_toggled(bool arg1);
@@ -34,14 +33,16 @@ private slots:
     void on_labelsTableWidget_itemSelectionChanged();
 
     void on_scribbleAdded(QGraphicsPathItem* pi);
-
     void on_addLabelButton_clicked();
-
     void on_actionRecompute_triggered();
-
     void on_actionConfigure_triggered();
 
+    // events from segmentation engine
+    void onRecomputeDone();
+
 private:
+    void clearAllScribbles();
+    void showPixmapFitInView(QPixmap pixmap);
     void enableDisableScribble();
     void addScribbleToSegmentationEngine(QGraphicsPathItem *pi);
     void setImageForSegmentation(QPixmap pixmap);
@@ -57,7 +58,7 @@ private:
 
     ZoomMediator* _zoomMediator;
     ScribbleMediator* _scribbleMediator;
-    SegmentationEngine _segmentationEngine;
+    SegmentationEngine* _segmentationEngine;
 };
 
 #endif // MAINWINDOW_H

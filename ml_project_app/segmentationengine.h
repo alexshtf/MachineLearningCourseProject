@@ -14,7 +14,7 @@ class SegmentationEngine : public QObject
 {
     Q_OBJECT
 public:
-    SegmentationEngine(const class Config& config, QObject* parent = nullptr);
+    SegmentationEngine(const class Config& config, class ComputeSegmentationWorker* worker, QObject* parent = nullptr);
     ~SegmentationEngine();
 
     void reset(QImage image);
@@ -27,17 +27,7 @@ public:
     void saveSimilarity(const QString& fileName);
 
 signals:
-
-    /*
-    void startedRecompute();
-    void trainedSVM();
-    void computedSimilarity();
-    void createdMRF();
-    void mapInitialized();
-    void iterationFinished(uint num, double dual);
-    void recomputeDone(boost::multi_array<size_t, 2> segmentation);
-     */
-
+    // signals for the UI
     void startedRecompute();
     void trainedSVM();
     void computedSimilarity();
@@ -45,6 +35,9 @@ signals:
     void mapInitialized();
     void iterationFinished(uint num, double dual);
     void recomputeDone();
+
+    // signal to the worker - to start computing
+    void compute(const QImage& image, const Common::PixelsLabelsArray& descriptors, QMap<int, QVector<QPoint>> scribbles);
 
 private slots:
     void onRecomputeDone(boost::multi_array<size_t, 2> segmentation);

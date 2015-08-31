@@ -22,13 +22,13 @@ QColor getRandomColor()
 
 }
 
-MainWindow::MainWindow(Config &config, QWidget *parent) :
+MainWindow::MainWindow(Config &config, SegmentationEngine *segmentationEngine, QWidget *parent) :
     QMainWindow(parent),
     _ui(new Ui::MainWindow),
     _config(config),
     _scene(new QGraphicsScene),
     _imagePixmapItem(_scene->addPixmap(QPixmap())),
-    _segmentationEngine(config)
+    _segmentationEngine(segmentationEngine)
 {
     _ui->setupUi(this);
     _ui->graphicsView->setScene(_scene);
@@ -49,6 +49,9 @@ MainWindow::MainWindow(Config &config, QWidget *parent) :
 
     // select a label
     _ui->labelsTableWidget->selectRow(0);
+
+    // connect to segmentation engine events
+    connect(_segmentationEngine, &SegmentationEngine::recomputeDone, this, &MainWindow::onRecomputeDone);
 }
 
 MainWindow::~MainWindow()
@@ -129,12 +132,16 @@ void MainWindow::on_actionSaveSimilarityMap_triggered()
         tr("Binary Interleaved Format (*.bif);;All files (*.*)")
     );
     if (!fileName.isEmpty())
-        _segmentationEngine.saveSimilarity(fileName);
+        _segmentationEngine->saveSimilarity(fileName);
 }
 
 void MainWindow::on_actionRecompute_triggered()
 {
-    _segmentationEngine.recompute();
+    _segmentationEngine->recompute();
+}
+
+void MainWindow::onRecomputeDone()
+{
     displaySegmentation();
 }
 
@@ -185,13 +192,13 @@ void MainWindow::addScribbleToSegmentationEngine(QGraphicsPathItem *pi)
     for(auto item : _ui->labelsTableWidget->selectedItems())
     {
         auto labelId = item->row();
-        _segmentationEngine.addScribble(pi->path(), labelId);
+        _segmentationEngine->addScribble(pi->path(), labelId);
     }
 }
 
 void MainWindow::setImageForSegmentation(QPixmap pixmap)
 {
-    _segmentationEngine.reset(pixmap.toImage());
+    _segmentationEngine->reset(pixmap.toImage());
 }
 
 void MainWindow::displaySegmentation()
@@ -199,9 +206,9 @@ void MainWindow::displaySegmentation()
     auto pixmap = _segmentedImage.copy();
 
     QPainter painter(&pixmap);
-    for(auto label : _segmentationEngine.getLabels())
+    for(auto label : _segmentationEngine->getLabels())
     {
-        auto mask = _segmentationEngine.getMaskOf(label);
+        auto mask = _segmentationEngine->getMaskOf(label);
         auto labelColor = _ui->labelsTableWidget->item(label, 0)->backgroundColor();
 
         labelColor.setAlpha(64);
