@@ -1,6 +1,7 @@
 #include "computesegmentationworker.h"
 #include "starupdatemrfmap.h"
 #include "neighborhoods.h"
+#include "config.h"
 #include "svm.h"
 
 #include <QPoint>
