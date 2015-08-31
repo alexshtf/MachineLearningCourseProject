@@ -157,10 +157,16 @@ void MainWindow::on_actionSaveSimilarityMap_triggered()
 void MainWindow::on_actionRecompute_triggered()
 {
     _segmentationEngine->recompute();
+
+    _ui->topLayout->setEnabled(false);
+    _ui->toolBar->setEnabled(false);
 }
 
 void MainWindow::onRecomputeDone()
 {
+    _ui->topLayout->setEnabled(true);
+    _ui->toolBar->setEnabled(true);
+
     displaySegmentation();
 }
 
@@ -272,12 +278,12 @@ void MainWindow::log(const QString &message)
 
     // display time
     auto timeItem = new QTableWidgetItem(QString::number(msec.count()));
-    timeItem->setFlags(Qt::NoItemFlags);
+    timeItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     _ui->log->setItem(row, 0, timeItem);
 
     // display message
     auto messageItem = new QTableWidgetItem(message);
-    messageItem->setFlags(Qt::NoItemFlags);
+    messageItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     _ui->log->setItem(row, 1, messageItem);
 
     // make the log advance
