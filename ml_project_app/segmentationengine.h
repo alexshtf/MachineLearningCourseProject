@@ -11,6 +11,8 @@
 class SegmentationEngine
 {
 public:
+    SegmentationEngine(const class Config& config);
+
     void reset(QImage image);
     void addScribble(QPainterPath path, int labelId);
     void recompute();
@@ -24,6 +26,7 @@ private:
     Common::PixelsLabelsArray computeSimilarity();
     class GridMRF makeMrf(Common::PixelsLabelsArray similarity);
 
+    const class Config& _config;
     QImage _image;
     Common::PixelsLabelsArray _descriptors;
     QMap<int, QList<QPainterPath>> _scribbles;

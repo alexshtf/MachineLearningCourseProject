@@ -19,8 +19,10 @@ public:
     // iteration
     virtual void init() = 0;
     virtual void nextIteration() = 0;
+    virtual void computePrimal();
+
 protected:
-    void setPrimalVariablesToUnaryMaximizers();
+    void computePrimalForCurrentDual();
     size_t primalAt(const Pixel& pixel) const;
     double &dualAt(const EdgeDesc& edge, const Pixel& at, size_t label);
     double unaryMax(const Pixel& pixel, size_t &maxLabel) const;

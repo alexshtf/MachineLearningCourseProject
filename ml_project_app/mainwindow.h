@@ -19,7 +19,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(class Config& config, QWidget *parent = 0);
     ~MainWindow();
 
 private slots:
@@ -39,6 +39,8 @@ private slots:
 
     void on_actionRecompute_triggered();
 
+    void on_actionConfigure_triggered();
+
 private:
     void enableDisableScribble();
     void addScribbleToSegmentationEngine(QGraphicsPathItem *pi);
@@ -46,6 +48,9 @@ private:
     void displaySegmentation();
 
     Ui::MainWindow* _ui;
+
+    Config& _config;
+
     QPixmap _segmentedImage;
     QGraphicsScene* _scene;
     QGraphicsPixmapItem* _imagePixmapItem;

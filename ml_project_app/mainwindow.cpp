@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "zoommediator.h"
+#include "configdialog.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QGraphicsPixmapItem>
@@ -21,11 +22,13 @@ QColor getRandomColor()
 
 }
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(Config &config, QWidget *parent) :
     QMainWindow(parent),
     _ui(new Ui::MainWindow),
+    _config(config),
     _scene(new QGraphicsScene),
-    _imagePixmapItem(_scene->addPixmap(QPixmap()))
+    _imagePixmapItem(_scene->addPixmap(QPixmap())),
+    _segmentationEngine(config)
 {
     _ui->setupUi(this);
     _ui->graphicsView->setScene(_scene);
@@ -224,4 +227,10 @@ void MainWindow::on_addLabelButton_clicked()
     auto nameItem = new QTableWidgetItem(QString("Label %1").arg(row + 1));
     nameItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
     _ui->labelsTableWidget->setItem(row, 1, nameItem);
+}
+
+void MainWindow::on_actionConfigure_triggered()
+{
+    ConfigDialog dialog(_config);
+    dialog.exec();
 }

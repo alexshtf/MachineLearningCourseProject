@@ -1,19 +1,24 @@
 #include "segmentationengine.h"
 #include "scribblemaskgenerator.h"
-#include "svm.h"
-#include "PixelsLabelsArray.BIF.h"
+
+// MRF related
 #include "starupdatemrfmap.h"
 #include "gridmrf.h"
 #include "neighborhoods.h"
+
+// misc. files
+#include "PixelsLabelsArray.BIF.h"
+#include "config.h"
+#include "svm.h"
+
 #include <QPainter>
+#include <QtDebug>
+
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <cmath>
 
 namespace {
-
-const size_t DESCRIPTOR_DIM = 25 * 3; // RGB color of a 5x5 neighborhood
 
 QMap<int, QVector<QPoint>> getLabelPixels(const QMap<int, ScribbleMaskGenerator>& generators)
 {
@@ -34,17 +39,22 @@ QColor rgbAt(const QImage& image, int x, int y)
     return QColor::fromRgb(image.pixel(std::abs(x), std::abs(y)));
 }
 
-Common::PixelsLabelsArray computeDescriptors(const QImage& image)
+Common::PixelsLabelsArray computeDescriptors(const QImage& image, size_t neighborhoodSize)
 {
-    Common::PixelsLabelsArray result(image.height(), image.width(), DESCRIPTOR_DIM);
+    auto descriptorDim = (2 * neighborhoodSize + 1) * (2 * neighborhoodSize + 1) * 3; // number of pixels x 3 channels
+    Common::PixelsLabelsArray result(image.height(), image.width(), descriptorDim);
+
+    auto szx = static_cast<int>(neighborhoodSize);
+    auto szy = static_cast<int>(neighborhoodSize);
+
     for(int x = 0; x < image.width(); ++x)
     {
         for(int y = 0; y < image.height(); ++y)
         {
             size_t l = 0;
-            for(int dx = -2; dx <= 2; ++dx)
+            for(int dx = -szx; dx <= szx; ++dx)
             {
-                for(int dy = -2; dy <= 2; ++dy)
+                for(int dy = -szy; dy <= szy; ++dy)
                 {
                     auto rgb = rgbAt(image, x + dx, y + dy);
                     auto hsv = rgb.toHsv();
@@ -53,7 +63,7 @@ Common::PixelsLabelsArray computeDescriptors(const QImage& image)
                     result.At(y, x, l + 2) = hsv.valueF();
 
                     l += 3;
-                    assert(l <= DESCRIPTOR_DIM);
+                    assert(l <= descriptorDim);
                 }
             }
         }
@@ -159,12 +169,18 @@ double dist(const QImage& image, const Pixel& left, const Pixel& right)
 
 }
 
+SegmentationEngine::SegmentationEngine(const Config &config)
+    : _config(config)
+{
+
+}
+
 void SegmentationEngine::reset(QImage image)
 {
     _image = image;
     _scribbles.clear();
     _generators.clear();
-    _descriptors = computeDescriptors(_image);
+    _descriptors = computeDescriptors(_image, _config.getNeighborhoodSize());
 }
 
 void SegmentationEngine::addScribble(QPainterPath path, int labelId)
@@ -190,7 +206,7 @@ void SegmentationEngine::recompute()
     mrfMap.init();
     auto prevDualEnergy = std::numeric_limits<double>::min();
     auto currDualEnergy = mrfMap.computeDualEnergy();
-    auto epsilon = 1E-5;
+    auto epsilon = _config.getStoppingEpsilon() * (mrf.rows() * mrf.cols()); // epsilon is normalized by image size
     while (std::abs(prevDualEnergy - currDualEnergy) > epsilon)
     {
         mrfMap.nextIteration();
@@ -198,6 +214,7 @@ void SegmentationEngine::recompute()
         currDualEnergy = mrfMap.computeDualEnergy();
     }
 
+    mrfMap.computePrimal();
     _segmentation.resize(boost::extents[mrf.rows()][mrf.cols()]);
     _segmentation = mrfMap.primal();
 }

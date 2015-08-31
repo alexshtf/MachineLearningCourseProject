@@ -214,6 +214,8 @@
    <addaction name="separator"/>
    <addaction name="actionRecompute"/>
    <addaction name="actionSaveSimilarityMap"/>
+   <addaction name="separator"/>
+   <addaction name="actionConfigure"/>
   </widget>
   <action name="actionOpenImage">
    <property name="text">
@@ -270,6 +272,11 @@
   <action name="actionRecompute">
    <property name="text">
     <string>Recompute</string>
+   </property>
+  </action>
+  <action name="actionConfigure">
+   <property name="text">
+    <string>Configure</string>
    </property>
   </action>
  </widget>

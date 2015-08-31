@@ -4,15 +4,14 @@
 #
 #-------------------------------------------------
 
+include(../common.pri)
+
 QT       -= core gui
 
 TARGET = common
 TEMPLATE = lib
 
 CONFIG += staticlib
-CONFIG += ltcg
-CONFIG += c++14
-
 CONFIG -= app_bundle
 CONFIG -= qt
 

@@ -3,14 +3,13 @@
 # Project created by QtCreator 2015-08-23T10:50:07
 #
 #-------------------------------------------------
+include(../common.pri)
 
 QT       -= core gui
 
 TARGET = mrf
 TEMPLATE = lib
 CONFIG += staticlib
-CONFIG += ltcg
-CONFIG += c++14
 
 SOURCES += \
     gridmrf.cpp \

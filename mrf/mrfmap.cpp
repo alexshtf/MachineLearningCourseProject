@@ -57,13 +57,18 @@ double MRFMap::computeDualEnergy() const
     return sum;
 }
 
+void MRFMap::computePrimal()
+{
+    computePrimalForCurrentDual();
+}
+
 void MRFMap::init()
 {
     std::fill_n(_dualVariables.origin(), _dualVariables.num_elements(), 0.0);
-    setPrimalVariablesToUnaryMaximizers();
+    computePrimalForCurrentDual();
 }
 
-void MRFMap::setPrimalVariablesToUnaryMaximizers()
+void MRFMap::computePrimalForCurrentDual()
 {
     for(size_t r = 0; r < rs(); ++r)
         for(size_t c = 0; c < cs(); ++c)

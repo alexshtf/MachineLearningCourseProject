@@ -3,6 +3,7 @@
 # Project created by QtCreator 2015-07-16T10:36:59
 #
 #-------------------------------------------------
+include(../common.pri)
 
 QT       += core gui
 
@@ -11,8 +12,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ml_project
 TEMPLATE = app
 
-CONFIG += c++14
-CONFIG += ltcg
 CONFIG += warn_off
 
 
@@ -22,15 +21,20 @@ SOURCES += main.cpp\
     zoommediator.cpp \
     scribblemediator.cpp \
     scribblemaskgenerator.cpp \
-    segmentationengine.cpp
+    segmentationengine.cpp \
+    config.cpp \
+    configdialog.cpp
 
 HEADERS  += mainwindow.h \
     zoommediator.h \
     scribblemediator.h \
     scribblemaskgenerator.h \
-    segmentationengine.h
+    segmentationengine.h \
+    config.h \
+    configdialog.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    configdialog.ui
 
 INCLUDEPATH += $$PWD/../boost-libs/include
 

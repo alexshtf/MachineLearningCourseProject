@@ -7,3 +7,4 @@ SUBDIRS += libsvm \
     mrf \
     mrf_unittest \
     ml_project_app
+

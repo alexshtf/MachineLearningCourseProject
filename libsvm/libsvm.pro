@@ -1,7 +1,6 @@
 TEMPLATE = lib
 
-CONFIG += staticlib
-CONFIG += ltcg
+include(../common.pri)
 
 CONFIG -= app_bundle
 CONFIG -= qt

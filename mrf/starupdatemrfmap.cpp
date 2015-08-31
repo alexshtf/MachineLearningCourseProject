@@ -24,8 +24,6 @@ void StarUpdateMRFMap::nextIteration()
     for(auto r = 0; r < rs(); ++r)
         for(auto c = 0; c < cs(); ++c)
             starUpdate(Pixel(r, c), deltaMinus, omega, omegaJ);
-
-    setPrimalVariablesToUnaryMaximizers();
 }
 
 void StarUpdateMRFMap::starUpdate(const Pixel &pixel, work2d& deltaMinus, work1d& omega, work2d& omegaJ)
