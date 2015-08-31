@@ -154,6 +154,8 @@ Common::PixelsLabelsArray ComputeSegmentationWorker::computeSimilarity(const Com
         if (!svm_check_parameter(&prob, &param))
         {
             auto model = svm_train(&prob, &param);
+            emit trainedSVM();
+
             fillSimilarity(similarity, descriptors, model, label);
             svm_free_and_destroy_model(&model);
         }

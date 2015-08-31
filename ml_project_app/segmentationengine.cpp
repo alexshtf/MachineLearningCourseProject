@@ -8,6 +8,7 @@
 #include <QPainter>
 #include <QtDebug>
 
+#include <chrono>
 #include <algorithm>
 #include <cassert>
 #include <cmath>

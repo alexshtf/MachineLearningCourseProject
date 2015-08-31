@@ -6,6 +6,7 @@
 #include "segmentationengine.h"
 #include <QMainWindow>
 #include <memory>
+#include <chrono>
 
 namespace Ui {
 class MainWindow;
@@ -48,6 +49,8 @@ private:
     void setImageForSegmentation(QPixmap pixmap);
     void displaySegmentation();
 
+    void log(const QString& message);
+
     Ui::MainWindow* _ui;
 
     Config& _config;
@@ -59,6 +62,8 @@ private:
     ZoomMediator* _zoomMediator;
     ScribbleMediator* _scribbleMediator;
     SegmentationEngine* _segmentationEngine;
+
+    std::chrono::high_resolution_clock::time_point _epoch;
 };
 
 #endif // MAINWINDOW_H

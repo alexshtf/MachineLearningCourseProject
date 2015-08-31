@@ -43,7 +43,6 @@ private slots:
     void onRecomputeDone(boost::multi_array<size_t, 2> segmentation);
 
 private:
-
     const class Config& _config;
     class ComputeSegmentationWorker* _worker;
 
