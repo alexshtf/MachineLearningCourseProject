@@ -4,7 +4,7 @@
 #include "mrfmap.h"
 #include <boost/multi_array.hpp>
 
-class StarUpdateMRFMap : MRFMap
+class StarUpdateMRFMap : public MRFMap
 {
 public:
     StarUpdateMRFMap(const GridMRF& mrf);

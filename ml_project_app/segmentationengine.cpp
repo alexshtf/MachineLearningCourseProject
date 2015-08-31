@@ -2,7 +2,7 @@
 #include "scribblemaskgenerator.h"
 #include "svm.h"
 #include "PixelsLabelsArray.BIF.h"
-#include "mrfmap.h"
+#include "starupdatemrfmap.h"
 #include "gridmrf.h"
 #include "neighborhoods.h"
 #include <QPainter>
@@ -145,11 +145,16 @@ double getMaxValue(const Common::PixelsLabelsArray& segmentation, int x, int y)
     return *max;
 }
 
-double dist(const Pixel& left, const Pixel& right)
+double dist(const QImage& image, const Pixel& left, const Pixel& right)
 {
-    auto dr = left.row() - right.row();
-    auto dc = left.col() - right.col();
-    return std::sqrt(dr * dr + dc * dc);
+    auto c1 = QColor::fromRgb(image.pixel(left.col(), left.row()));
+    auto c2 = QColor::fromRgb(image.pixel(right.col(), right.row()));
+
+    auto rDiff = c1.redF() - c2.redF();
+    auto gDiff = c1.greenF() - c2.greenF();
+    auto bDiff = c1.blueF() - c2.blueF();
+
+    return std::sqrt(rDiff*rDiff + gDiff*gDiff + bDiff*bDiff);
 }
 
 }
@@ -180,16 +185,17 @@ void SegmentationEngine::recompute()
 {
     auto mrf = makeMrf(computeSimilarity());
 
-    EmptyMRFMap mrfMap(mrf);
+    StarUpdateMRFMap mrfMap(mrf);
 
     mrfMap.init();
     auto prevDualEnergy = std::numeric_limits<double>::min();
-    auto currDualEnergy = 0.0;
+    auto currDualEnergy = mrfMap.computeDualEnergy();
     auto epsilon = 1E-5;
-    while (std::abs(prevDualEnergy - (currDualEnergy = mrfMap.computeDualEnergy())) < epsilon)
+    while (std::abs(prevDualEnergy - currDualEnergy) > epsilon)
     {
-        prevDualEnergy = currDualEnergy;
         mrfMap.nextIteration();
+        prevDualEnergy = currDualEnergy;
+        currDualEnergy = mrfMap.computeDualEnergy();
     }
 
     _segmentation.resize(boost::extents[mrf.rows()][mrf.cols()]);
@@ -269,7 +275,7 @@ GridMRF SegmentationEngine::makeMrf(Common::PixelsLabelsArray similarity)
         {
             Pixel p(r, c);
             for(const auto& n : FourNeighbors(mrf.rows(), mrf.cols(), p))
-                mrf.setPairwise(p, n, -dist(p, n));
+                mrf.setPairwise(p, n, -dist(_image, p, n));
         }
     }
 
