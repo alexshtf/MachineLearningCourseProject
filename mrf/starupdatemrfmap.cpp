@@ -1,6 +1,6 @@
 #include "starupdatemrfmap.h"
 #include "neighborhoods.h"
-#include "util.h"
+#include "Util.h"
 #include <boost/multi_array.hpp>
 #include <boost/range/irange.hpp>
 
@@ -56,7 +56,7 @@ void StarUpdateMRFMap::starUpdate(const Pixel &pixel, work2d& deltaMinus, work1d
         const auto& nj = neighbors[j];
         for(auto xi : lsRng)
         {
-            omegaJ[j][xi] = max_key(lsRng, [&] (size_t xj) {
+            omegaJ[j][xi] = max_value(lsRng, [&] (size_t xj) {
                 return _mrf.getPairwise(pixel, nj, xi, xj) + deltaMinus[j][xj];
             });
         }
@@ -71,12 +71,20 @@ void StarUpdateMRFMap::starUpdate(const Pixel &pixel, work2d& deltaMinus, work1d
     }
 
     // perform the star update
+    double coeff = 1.0 / (1 + n);
     for(size_t j = 0; j < n; ++j)
     {
         const auto& nj = neighbors[j];
         for(auto xi : lsRng)
+            dualAt(EdgeDesc(pixel, nj), pixel, xi) = -coeff * omega[xi]  + omegaJ[j][xi];
+
+        for(auto xj : lsRng)
         {
-            dualAt(EdgeDesc(pixel, nj), pixel, xi) = -1.0; // TODO: Write here
+            auto m = max_value(lsRng, [&] (size_t xi) {
+                return _mrf.getPairwise(pixel, nj, xi, xj) + 2 * coeff * omega[xi] - omegaJ[j][xi];
+            });
+            dualAt(EdgeDesc(pixel, nj), nj, xj) = -0.5 * deltaMinus[j][xj] + 0.5 * m;
         }
+
     }
 }

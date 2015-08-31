@@ -17,10 +17,6 @@ private:
     typedef std::vector<double> work1d;
 
     void starUpdate(const Pixel& pixel, work2d& deltaMinus, work1d& omega, work2d& omegaJ);
-    size_t ls() const { return _mrf.labels(); }
-    size_t rs() const { return _mrf.rows(); }
-    size_t cs() const { return _mrf.cols(); }
-    size_t ns() const { return _mrf.neighborsCapacity(); }
 };
 
 #endif // STARUPDATEMRFMAP_H

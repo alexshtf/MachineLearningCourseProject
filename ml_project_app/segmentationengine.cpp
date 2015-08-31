@@ -255,17 +255,21 @@ Common::PixelsLabelsArray SegmentationEngine::computeSimilarity()
 
 GridMRF SegmentationEngine::makeMrf(Common::PixelsLabelsArray similarity)
 {
+
     GridMRF mrf(similarity.Rows(), similarity.Cols(), similarity.Labels(), 6);
+
+    // negate similarity (our MRF inference engine finds argmax and not argmin)
+    std::for_each(similarity.Data(), similarity.Data() + similarity.Size(), [] (double& x) { x = -x; });
     mrf.setUnary(std::move(similarity));
 
-    // set pairwise potentials of 4-neighborhood
+    // set pairwise potentials of 4-neighborhood (negative, again, since we look for argmax)
     for(size_t r = 0; r < mrf.rows(); ++r)
     {
         for(size_t c = 0; c < mrf.cols(); ++c)
         {
             Pixel p(r, c);
             for(const auto& n : FourNeighbors(mrf.rows(), mrf.cols(), p))
-                mrf.setPairwise(p, n, dist(p, n));
+                mrf.setPairwise(p, n, -dist(p, n));
         }
     }
 

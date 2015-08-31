@@ -31,13 +31,13 @@ SCENARIO("MRF-MAP base class provides common services")
 
         WHEN("Unary and pairwise potentials are set")
         {
-            mrf.setUnary(Pixel(0,0), {2.0, 3.0, 1.0, 6.0}); // min is label 2
-            mrf.setUnary(Pixel(1,0), {2.0, 3.0, 4.0, 6.0}); // min is label 0
-            mrf.setUnary(Pixel(0,1), {3.0, 2.0, 4.0, 6.0}); // min is label 1
-            mrf.setUnary(Pixel(1,1), {3.0, 2.0, 4.0, 1.0}); // min is label 3
+            mrf.setUnary(Pixel(0,0), {-2.0, -3.0, -1.0, -6.0}); // max is label 2
+            mrf.setUnary(Pixel(1,0), {-2.0, -3.0, -4.0, -6.0}); // max is label 0
+            mrf.setUnary(Pixel(0,1), {-3.0, -2.0, -4.0, -6.0}); // max is label 1
+            mrf.setUnary(Pixel(1,1), {-3.0, -2.0, -4.0, -1.0}); // max is label 3
 
-            mrf.setPairwise(Pixel(0,0), Pixel(1,0), 13.0);
-            mrf.setPairwise(Pixel(0,0), Pixel(0,1), 17.0);
+            mrf.setPairwise(Pixel(0,0), Pixel(1,0), -13.0);
+            mrf.setPairwise(Pixel(0,0), Pixel(0,1), -17.0);
 
             AND_WHEN("MRF-MAP Initialization is performed")
             {
@@ -68,7 +68,7 @@ SCENARIO("MRF-MAP base class provides common services")
 
                 THEN("Dual energy is below primal energy")
                 {
-                    REQUIRE(mrfMap.computePrimalEnergy() > mrfMap.computeDualEnergy());
+                    REQUIRE(mrfMap.computePrimalEnergy() < mrfMap.computeDualEnergy());
                 }
             }
         }

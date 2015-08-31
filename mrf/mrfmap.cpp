@@ -1,7 +1,8 @@
 #include "mrfmap.h"
 #include <algorithm>
+#include "Util.h"
 #include <boost/range/irange.hpp>
-#include <boost/range/algorithm/min_element.hpp>
+#include <boost/range/algorithm/max_element.hpp>
 
 namespace {
 
@@ -24,8 +25,8 @@ double MRFMap::computePrimalEnergy() const
     auto sum = 0.0;
 
     // accumulate unary potentials
-    for(size_t r = 0; r < _mrf.rows(); ++r)
-        for(size_t c = 0; c < _mrf.cols(); ++c)
+    for(size_t r = 0; r < rs(); ++r)
+        for(size_t c = 0; c < cs(); ++c)
             sum += _mrf.getUnary(Pixel(r, c), _primalVariables[r][c]);
 
     // accumulate pairwise potentials
@@ -43,14 +44,15 @@ double MRFMap::computeDualEnergy() const
 {
     auto sum = 0.0;
 
-    // accumulate unary minima
-    for(size_t r = 0; r < _mrf.rows(); ++r)
-        for(size_t c = 0; c < _mrf.cols(); ++c)
-            sum += unaryMin(Pixel(r, c));
+    // accumulate unary maxima
+    size_t dummyMaxLabel;
+    for(size_t r = 0; r < rs(); ++r)
+        for(size_t c = 0; c < cs(); ++c)
+            sum += unaryMax(Pixel(r, c), dummyMaxLabel);
 
-    // accumulaty pairwise minima
+    // accumulaty pairwise maxima
     for(const auto& edge : _mrf.getEdges())
-        sum += pairwiseMin(edge);
+        sum += pairwiseMax(edge);
 
     return sum;
 }
@@ -58,22 +60,14 @@ double MRFMap::computeDualEnergy() const
 void MRFMap::init()
 {
     std::fill_n(_dualVariables.origin(), _dualVariables.num_elements(), 0.0);
-    setPrimalVariablesToUnaryMinimizers();
+    setPrimalVariablesToUnaryMaximizers();
 }
 
-void MRFMap::setPrimalVariablesToUnaryMinimizers()
+void MRFMap::setPrimalVariablesToUnaryMaximizers()
 {
-    auto labels = boost::irange((size_t) 0, _mrf.labels());
-    for(size_t r = 0; r < _mrf.rows(); ++r)
-    {
-        for(size_t c = 0; c < _mrf.cols(); ++c)
-        {
-            Pixel pixel(r, c);
-            _primalVariables[r][c] = *boost::min_element(labels, [&] (auto l1, auto l2) {
-                return _mrf.getUnary(pixel, l1) < _mrf.getUnary(pixel, l2);
-            });
-        }
-    }
+    for(size_t r = 0; r < rs(); ++r)
+        for(size_t c = 0; c < cs(); ++c)
+            unaryMax(Pixel(r, c), _primalVariables[r][c]);
 }
 
 size_t MRFMap::primalAt(const Pixel &pixel) const
@@ -88,13 +82,11 @@ double& MRFMap::dualAt(const EdgeDesc &edge, const Pixel &at, size_t label)
     return _dualVariables[edgeInfo.index][pixelIdx][label];
 }
 
-double MRFMap::unaryMin(const Pixel &pixel) const
+double MRFMap::unaryMax(const Pixel &pixel, size_t& maxLabel) const
 {
-    double minEnergy = std::numeric_limits<double>::max();
+    double maxEnergy;
 
-    for(size_t l = 0; l < _mrf.labels(); ++l)
-    {
-        // compute local energy
+    std::tie(maxEnergy, maxLabel) = max_and_argmax(labelRange(), [&] (size_t l) {
         double energy = _mrf.getUnary(pixel, l);
         for(const auto& neighbor : _mrf.neighbors(pixel))
         {
@@ -102,34 +94,20 @@ double MRFMap::unaryMin(const Pixel &pixel) const
             auto pixelIndex = pixel == edgeInfo.desc.first() ? 0 : 1;
             energy += _dualVariables[edgeInfo.index][pixelIndex][l];
         }
+        return energy;
+    });
 
-        // update minimum
-        if (energy < minEnergy)
-            minEnergy = energy;
-    }
-
-    return minEnergy;
+    return maxEnergy;
 }
 
-double MRFMap::pairwiseMin(const EdgeInfo &edge) const
+double MRFMap::pairwiseMax(const EdgeInfo &edge) const
 {
-    double minEnergy = std::numeric_limits<double>::max();
-
-    for(size_t l1 = 0; l1 < _mrf.labels(); ++l1)
-    {
-        for(size_t l2 = 0; l2 < _mrf.labels(); ++l2)
-        {
-            // compute local energy
-            double energy
-                    = _mrf.getPairwise(edge.index, l1, l2)
-                    + _dualVariables[edge.index][0][l1]
-                    + _dualVariables[edge.index][1][l2];
-
-            // update minimum
-            if (energy < minEnergy)
-                minEnergy = energy;
-        }
-    }
-
-    return minEnergy;
+    return max_value(labelRange(), [&] (size_t l1) {
+        return max_value(labelRange(), [&] (size_t l2) {
+            return _mrf.getPairwise(edge.index, l1, l2)
+                + _dualVariables[edge.index][0][l1]
+                + _dualVariables[edge.index][1][l2];
+        });
+    });
 }
+

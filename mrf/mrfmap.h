@@ -3,6 +3,7 @@
 
 #include "gridmrf.h"
 #include <boost/multi_array.hpp>
+#include <boost/range/irange.hpp>
 
 class MRFMap
 {
@@ -19,11 +20,17 @@ public:
     virtual void init() = 0;
     virtual void nextIteration() = 0;
 protected:
-    void setPrimalVariablesToUnaryMinimizers();
+    void setPrimalVariablesToUnaryMaximizers();
     size_t primalAt(const Pixel& pixel) const;
     double &dualAt(const EdgeDesc& edge, const Pixel& at, size_t label);
-    double unaryMin(const Pixel& pixel) const;
-    double pairwiseMin(const EdgeInfo& edge) const;
+    double unaryMax(const Pixel& pixel, size_t &maxLabel) const;
+    double pairwiseMax(const EdgeInfo& edge) const;
+
+    size_t rs() const { return _mrf.rows(); }
+    size_t cs() const { return _mrf.cols(); }
+    size_t ls() const { return _mrf.labels(); }
+    size_t ns() const { return _mrf.neighborsCapacity(); }
+    auto labelRange() const { return boost::irange((size_t)0, ls()); }
 
     const GridMRF& _mrf;
     boost::multi_array<double, 3> _dualVariables; // Edges X 2 X Labels (since each edge is connected to two pixels)

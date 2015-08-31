@@ -2,28 +2,53 @@
 #define UTIL_H
 
 #include <stdexcept>
+#include <tuple>
 
 // assumption - [begin, end) is a non-empty range
-template<typename Iterator, typename KeyFunc>
-auto max_key(Iterator begin, Iterator end, KeyFunc key) -> decltype(key(*begin))
+template<typename Iterator, typename Func>
+auto max_and_argmax(Iterator begin, Iterator end, Func func) -> std::tuple<decltype(func(*begin)), decltype(*begin)>
 {
-    auto max = key(*begin);
+    auto argmax = *begin;
+    auto max = func(argmax);
     ++begin;
 
     for(; begin != end; ++begin)
     {
-        auto candidate = key(*begin);
-        if (candidate > max)
-            candidate = max;
+        auto arg = *begin;
+        auto val = func(arg);
+        if (val > max)
+        {
+            max = val;
+            argmax = arg;
+        }
     }
 
-    return candidate;
+    return std::make_tuple(max, argmax);
 }
 
-template<typename Range, typename KeyFunc>
-auto max_key(Range rng, KeyFunc key)
+// assumption - [begin, end) is a non-empty range
+template<typename Iterator, typename Func>
+auto max_value(Iterator begin, Iterator end, Func func)
 {
-    return max_key(begin(rng), end(rng), key);
+    decltype(func(*begin)) max;
+    decltype(*begin) argmax;
+
+    std::tie(max, argmax) = max_and_argmax(begin, end, func);
+    return max;
+}
+
+// assumption - rng is a non-empty range
+template<typename Range, typename Func>
+auto max_and_argmax(const Range& rng, Func func)
+{
+    return max_and_argmax(rng.begin(), rng.end(), func);
+}
+
+// assumption - rng is a non-empty range
+template<typename Range, typename Func>
+auto max_value(const Range& rng, Func func)
+{
+    return max_value(rng.begin(), rng.end(), func);
 }
 
 #endif // UTIL_H
