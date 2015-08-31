@@ -22,6 +22,14 @@ public:
 
     void saveSimilarity(const QString& fileName);
 
+public slots:
+    void startedRecompute();
+    void trainedSVM();
+    void computedSimilarity();
+    void mapInitialized();
+    void iterationFinished(uint num, double primal, double dual);
+    void recomputeDone();
+
 private:
     Common::PixelsLabelsArray computeSimilarity();
     class GridMRF makeMrf(Common::PixelsLabelsArray similarity);

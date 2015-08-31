@@ -23,7 +23,9 @@ SOURCES += main.cpp\
     scribblemaskgenerator.cpp \
     segmentationengine.cpp \
     config.cpp \
-    configdialog.cpp
+    configdialog.cpp \
+    computesegmentationworker.cpp \
+    metatypes.cpp
 
 HEADERS  += mainwindow.h \
     zoommediator.h \
@@ -31,7 +33,9 @@ HEADERS  += mainwindow.h \
     scribblemaskgenerator.h \
     segmentationengine.h \
     config.h \
-    configdialog.h
+    configdialog.h \
+    computesegmentationworker.h \
+    metatypes.h
 
 FORMS    += mainwindow.ui \
     configdialog.ui
