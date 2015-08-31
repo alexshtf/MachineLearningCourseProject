@@ -43,6 +43,6 @@ void Config::setStoppingEpsilon(double stoppingEpsilon)
 
 void Config::save()
 {
-    _settings.setValue(NEIGHBORHOOD_SIZE_KEY, _neighborhoodSize);
-    _settings.setValue(STOPPING_EPSILON_KEY, _stoppingEpsilon);
+    _settings.setValue(NEIGHBORHOOD_SIZE_KEY, QVariant::fromValue((uint) _neighborhoodSize));
+    _settings.setValue(STOPPING_EPSILON_KEY, QVariant::fromValue(_stoppingEpsilon));
 }

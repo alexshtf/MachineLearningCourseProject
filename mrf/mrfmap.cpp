@@ -1,6 +1,6 @@
 #include "mrfmap.h"
 #include <algorithm>
-#include "Util.h"
+#include "util.h"
 #include <boost/range/irange.hpp>
 #include <boost/range/algorithm/max_element.hpp>
 

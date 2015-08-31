@@ -19,7 +19,7 @@ SOURCES += PixelsLabelsArray.BIF.cpp
 
 HEADERS += PixelsLabelsArray.h \
     PixelsLabelsArray.BIF.h \
-    Util.h
+    util.h
 
 # boost
 INCLUDEPATH += $$PWD/../boost-libs/include

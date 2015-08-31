@@ -1,6 +1,6 @@
 #include "starupdatemrfmap.h"
 #include "neighborhoods.h"
-#include "Util.h"
+#include "util.h"
 #include <boost/multi_array.hpp>
 #include <boost/range/irange.hpp>
 
