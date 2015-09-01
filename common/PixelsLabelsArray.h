@@ -46,7 +46,7 @@ namespace Common
             , _cols(other._cols)
             , _data(AllocateStorage(other._rows, other._cols, other._labels))
         {
-            std::copy(Data(), Data() + Size(), const_cast<double*>(other.Data()));
+            std::copy(other.Data(), other.Data() + other.Size(), Data());
         }
 
 		PixelsLabelsArray(size_t rows, size_t cols, size_t labels)
