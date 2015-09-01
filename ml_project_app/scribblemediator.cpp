@@ -59,6 +59,7 @@ void ScribbleMediator::startScribble(QMouseEvent* event)
 
     QPen pen(_color);
     pen.setCosmetic(true);
+    pen.setWidth(3);
 
     _pathItem = new QGraphicsPathItem;
     _pathItem->setPath(path);
