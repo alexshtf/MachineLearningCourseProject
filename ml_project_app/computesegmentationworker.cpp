@@ -169,7 +169,6 @@ GridMRF ComputeSegmentationWorker::makeMrf(Common::PixelsLabelsArray similarity,
     GridMRF mrf(similarity.Rows(), similarity.Cols(), similarity.Labels(), 6);
 
     // negate similarity (our MRF inference engine finds argmax and not argmin)
-    std::for_each(similarity.Data(), similarity.Data() + similarity.Size(), [] (double& x) { x = -x; });
     mrf.setUnary(std::move(similarity));
 
     // set pairwise potentials of 4-neighborhood (negative, again, since we look for argmax)
