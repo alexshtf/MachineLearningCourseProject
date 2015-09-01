@@ -236,7 +236,7 @@ void MainWindow::displaySegmentation()
         auto mask = _segmentationEngine->getMaskOf(label);
         auto labelColor = _ui->labelsTableWidget->item(label, 0)->backgroundColor();
 
-        labelColor.setAlpha(64);
+        labelColor.setAlpha(96);
         QBrush transparentBrush(labelColor, mask);
 
         painter.fillRect(pixmap.rect(), transparentBrush);
