@@ -15,12 +15,15 @@ public:
     double getStoppingEpsilon() const;
     void setStoppingEpsilon(double stoppingEpsilon);
 
-    void save();
+    double getLambda() const;
+    void setLambda(double getLambda);
 
+    void save();
 private:
     QSettings& _settings;
     size_t _neighborhoodSize;
     double _stoppingEpsilon;
+    double _lambda;
 };
 
 #endif // CONFIG_H

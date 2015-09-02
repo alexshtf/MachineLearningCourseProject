@@ -178,7 +178,7 @@ GridMRF ComputeSegmentationWorker::makeMrf(Common::PixelsLabelsArray similarity,
         {
             Pixel p(r, c);
             for(const auto& n : FourNeighbors(mrf.rows(), mrf.cols(), p))
-                mrf.setPairwise(p, n, -dist(image, p, n));
+                mrf.setPairwise(p, n, -_config.getLambda() * dist(image, p, n));
         }
     }
 
