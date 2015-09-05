@@ -21,21 +21,21 @@ SOURCES += main.cpp\
     zoommediator.cpp \
     scribblemediator.cpp \
     scribblemaskgenerator.cpp \
-    segmentationengine.cpp \
     config.cpp \
     configdialog.cpp \
     computesegmentationworker.cpp \
-    metatypes.cpp
+    metatypes.cpp \
+    interactivesegmentationcontroller.cpp
 
 HEADERS  += mainwindow.h \
     zoommediator.h \
     scribblemediator.h \
     scribblemaskgenerator.h \
-    segmentationengine.h \
     config.h \
     configdialog.h \
     computesegmentationworker.h \
-    metatypes.h
+    metatypes.h \
+    interactivesegmentationcontroller.h
 
 FORMS    += mainwindow.ui \
     configdialog.ui

@@ -46,7 +46,7 @@ void StarUpdateMRFMap::starUpdate(const Pixel &pixel, work2d& deltaMinus, work1d
             deltaMinus[j][x] = _mrf.getUnary(nj, x);
             for(const auto& nk : _mrf.neighbors(neighbors[j]))
                 if (nk != pixel)
-                    deltaMinus[j][x] += dualAt(EdgeDesc(nk, nj), nj, x);
+                    deltaMinus[j][x] += dualAt(EdgeEndpoints(nk, nj), nj, x);
         }
     }
 
@@ -76,14 +76,14 @@ void StarUpdateMRFMap::starUpdate(const Pixel &pixel, work2d& deltaMinus, work1d
     {
         const auto& nj = neighbors[j];
         for(auto xi : lsRng)
-            dualAt(EdgeDesc(pixel, nj), pixel, xi) = -coeff * omega[xi]  + omegaJ[j][xi];
+            dualAt(EdgeEndpoints(pixel, nj), pixel, xi) = -coeff * omega[xi]  + omegaJ[j][xi];
 
         for(auto xj : lsRng)
         {
             auto m = max_value(lsRng, [&] (size_t xi) {
                 return _mrf.getPairwise(pixel, nj, xi, xj) + 2 * coeff * omega[xi] - omegaJ[j][xi];
             });
-            dualAt(EdgeDesc(pixel, nj), nj, xj) = -0.5 * deltaMinus[j][xj] + 0.5 * m;
+            dualAt(EdgeEndpoints(pixel, nj), nj, xj) = -0.5 * deltaMinus[j][xj] + 0.5 * m;
         }
 
     }

@@ -11,7 +11,7 @@ ZoomMediator::ZoomMediator(QGraphicsView *parent) : QObject(parent),
     parent->viewport()->installEventFilter(this);
 }
 
-void ZoomMediator::SetEnabled(bool isEnabled)
+void ZoomMediator::setEnabled(bool isEnabled)
 {
     _isEnabled = isEnabled;
 }

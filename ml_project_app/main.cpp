@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "config.h"
 #include "metatypes.h"
-#include "segmentationengine.h"
+#include "interactivesegmentationcontroller.h"
 #include "computesegmentationworker.h"
 #include <QApplication>
 #include <QThread>
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     worker.moveToThread(&workerThread);
     workerThread.start();
 
-    SegmentationEngine segmentationEngine(config, &worker);
+    InteractiveSegmentationController segmentationEngine(config, &worker);
     MainWindow w(config, &segmentationEngine);
     w.show();
 

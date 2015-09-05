@@ -32,8 +32,8 @@ double MRFMap::computePrimalEnergy() const
     // accumulate pairwise potentials
     for(const auto& edge : _mrf.getEdges())
     {
-        auto& pix1 = edge.desc.first();
-        auto& pix2 = edge.desc.second();
+        auto& pix1 = edge.endPoints.first();
+        auto& pix2 = edge.endPoints.second();
         sum += _mrf.getPairwise(edge.index, primalAt(pix1), primalAt(pix2));
     }
 
@@ -80,10 +80,10 @@ size_t MRFMap::primalAt(const Pixel &pixel) const
     return _primalVariables[pixel.row()][pixel.col()];
 }
 
-double& MRFMap::dualAt(const EdgeDesc &edge, const Pixel &at, size_t label)
+double& MRFMap::dualAt(const EdgeEndpoints &edge, const Pixel &at, size_t label)
 {
     auto edgeInfo = _mrf.getEdgeInfo(edge.first(), edge.second());
-    auto pixelIdx = edgeInfo.desc.first() == at ? 0 : 1;
+    auto pixelIdx = edgeInfo.endPoints.first() == at ? 0 : 1;
     return _dualVariables[edgeInfo.index][pixelIdx][label];
 }
 
@@ -96,7 +96,7 @@ double MRFMap::unaryMax(const Pixel &pixel, size_t& maxLabel) const
         for(const auto& neighbor : _mrf.neighbors(pixel))
         {
             auto edgeInfo = _mrf.getEdgeInfo(pixel, neighbor);
-            auto pixelIndex = pixel == edgeInfo.desc.first() ? 0 : 1;
+            auto pixelIndex = pixel == edgeInfo.endPoints.first() ? 0 : 1;
             energy += _dualVariables[edgeInfo.index][pixelIndex][l];
         }
         return energy;

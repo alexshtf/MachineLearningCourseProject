@@ -1,4 +1,4 @@
-#include "segmentationengine.h"
+#include "interactivesegmentationcontroller.h"
 
 #include "scribblemaskgenerator.h"
 #include "PixelsLabelsArray.BIF.h"
@@ -69,27 +69,27 @@ Common::PixelsLabelsArray computeDescriptors(const QImage& image, size_t neighbo
 
 }
 
-SegmentationEngine::SegmentationEngine(const Config &config, ComputeSegmentationWorker *worker, QObject *parent)
+InteractiveSegmentationController::InteractiveSegmentationController(const Config &config, ComputeSegmentationWorker *worker, QObject *parent)
     : QObject(parent)
     , _config(config)
     , _worker(worker)
 {
-    connect(this, &SegmentationEngine::compute, _worker, &ComputeSegmentationWorker::compute, Qt::QueuedConnection);
+    connect(this, &InteractiveSegmentationController::compute, _worker, &ComputeSegmentationWorker::compute, Qt::QueuedConnection);
 
-    connect(_worker, &ComputeSegmentationWorker::startedRecompute, this, &SegmentationEngine::startedRecompute, Qt::QueuedConnection);
-    connect(_worker, &ComputeSegmentationWorker::trainedSVM, this, &SegmentationEngine::trainedSVM, Qt::QueuedConnection);
-    connect(_worker, &ComputeSegmentationWorker::computedSimilarity, this, &SegmentationEngine::computedSimilarity, Qt::QueuedConnection);
-    connect(_worker, &ComputeSegmentationWorker::createdMRF, this, &SegmentationEngine::createdMRF, Qt::QueuedConnection);
-    connect(_worker, &ComputeSegmentationWorker::mapInitialized, this, &SegmentationEngine::mapInitialized, Qt::QueuedConnection);
-    connect(_worker, &ComputeSegmentationWorker::iterationFinished, this, &SegmentationEngine::iterationFinished, Qt::QueuedConnection);
-    connect(_worker, &ComputeSegmentationWorker::recomputeDone, this, &SegmentationEngine::onRecomputeDone, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::startedRecompute, this, &InteractiveSegmentationController::startedRecompute, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::trainedSVM, this, &InteractiveSegmentationController::trainedSVM, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::computedSimilarity, this, &InteractiveSegmentationController::computedSimilarity, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::createdMRF, this, &InteractiveSegmentationController::createdMRF, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::mapInitialized, this, &InteractiveSegmentationController::mapInitialized, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::iterationFinished, this, &InteractiveSegmentationController::iterationFinished, Qt::QueuedConnection);
+    connect(_worker, &ComputeSegmentationWorker::recomputeDone, this, &InteractiveSegmentationController::onRecomputeDone, Qt::QueuedConnection);
 }
 
-SegmentationEngine::~SegmentationEngine()
+InteractiveSegmentationController::~InteractiveSegmentationController()
 {
 }
 
-void SegmentationEngine::reset(QImage image)
+void InteractiveSegmentationController::reset(QImage image)
 {
     _image = image;
     _scribbles.clear();
@@ -97,7 +97,7 @@ void SegmentationEngine::reset(QImage image)
     _descriptors = computeDescriptors(_image, _config.getNeighborhoodSize());
 }
 
-void SegmentationEngine::addScribble(QPainterPath path, int labelId)
+void InteractiveSegmentationController::addScribble(QPainterPath path, int labelId)
 {
     _scribbles[labelId].append(path);
 
@@ -111,17 +111,17 @@ void SegmentationEngine::addScribble(QPainterPath path, int labelId)
     generator->addScribble(path);
 }
 
-void SegmentationEngine::recompute()
+void InteractiveSegmentationController::recompute()
 {
     emit compute(_image, _descriptors, getLabelPixels(_generators));
 }
 
-QList<int> SegmentationEngine::getLabels()
+QList<int> InteractiveSegmentationController::getLabels()
 {
     return _scribbles.keys();
 }
 
-QBitmap SegmentationEngine::getMaskOf(int labelId)
+QBitmap InteractiveSegmentationController::getMaskOf(int labelId)
 {
     QBitmap bitmap(_image.width(), _image.height());
     bitmap.fill();
@@ -143,13 +143,13 @@ QBitmap SegmentationEngine::getMaskOf(int labelId)
     return bitmap;
 }
 
-void SegmentationEngine::saveSimilarity(const QString &fileName)
+void InteractiveSegmentationController::saveSimilarity(const QString &fileName)
 {
     // TODO: Find a solution t similarity saving
     //Common::SaveBIF(computeSimilarity(), fileName.toStdString());
 }
 
-void SegmentationEngine::onRecomputeDone(boost::multi_array<size_t, 2> segmentation)
+void InteractiveSegmentationController::onRecomputeDone(boost::multi_array<size_t, 2> segmentation)
 {
     _segmentation.resize(boost::extents[_image.height()][_image.width()]);
     _segmentation = segmentation;

@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <iosfwd>
 
+// Coordinates of a pixel. Contains all facilities for it to be used in an STL container,
+// including equality, inequality, hash and less-than operators.
 class Pixel
 {
 public:
@@ -34,10 +36,14 @@ private:
     size_t _col;
 };
 
-class EdgeDesc
+
+// A canonical representation of an undirected edge endpoints in an MRF whose vertices are pixels.
+//      EdgeEndpoints(p1, p2) and EdgeEndPoints(p2, p1) are equal
+// Inludes all facilities required to be useful inside STL containers: equality, less-than, hash
+class EdgeEndpoints
 {
 public:
-    EdgeDesc(Pixel left, Pixel right)
+    EdgeEndpoints(Pixel left, Pixel right)
     {
         std::tie(_first, _second) = std::minmax(left, right);
     }
@@ -45,8 +51,9 @@ public:
     const Pixel& first() const { return _first; }
     const Pixel& second() const { return _second; }
 
-    bool operator==(const EdgeDesc& other) const { return tie() == other.tie(); }
-    bool operator<(const EdgeDesc& other) const { return tie() < other.tie(); }
+    bool operator==(const EdgeEndpoints& other) const { return tie() == other.tie(); }
+    bool operator!=(const EdgeEndpoints& other) const { return tie() != other.tie(); }
+    bool operator<(const EdgeEndpoints& other) const { return tie() < other.tie(); }
 
     size_t hash() const
     {
@@ -71,7 +78,7 @@ inline std::ostream& operator<<(std::ostream& os, const Pixel& pixel)
     return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const EdgeDesc& edgeKey)
+inline std::ostream& operator<<(std::ostream& os, const EdgeEndpoints& edgeKey)
 {
     os << "EdgeKey"
           " { first = " << edgeKey.first() <<
@@ -87,9 +94,9 @@ namespace std
         size_t operator()(const Pixel& pixel) { return pixel.hash(); }
     };
 
-    template<> struct hash<EdgeDesc>
+    template<> struct hash<EdgeEndpoints>
     {
-        size_t operator()(const EdgeDesc& edgeKey) { return edgeKey.hash(); }
+        size_t operator()(const EdgeEndpoints& edgeKey) { return edgeKey.hash(); }
     };
 }
 

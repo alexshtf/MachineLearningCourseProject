@@ -5,6 +5,7 @@
 #include <boost/multi_array.hpp>
 #include <boost/range/irange.hpp>
 
+// A base class for a primal-dual MRF-MAP inference engine.
 class MRFMap
 {
 public:
@@ -24,7 +25,7 @@ public:
 protected:
     void computePrimalForCurrentDual();
     size_t primalAt(const Pixel& pixel) const;
-    double &dualAt(const EdgeDesc& edge, const Pixel& at, size_t label);
+    double &dualAt(const EdgeEndpoints& edge, const Pixel& at, size_t label);
     double unaryMax(const Pixel& pixel, size_t &maxLabel) const;
     double pairwiseMax(const EdgeInfo& edge) const;
 
