@@ -6,7 +6,6 @@
 #include <QMessageBox>
 #include <QGraphicsPixmapItem>
 #include <QPixmap>
-#include <QClipboard>
 #include <random>
 
 namespace {
@@ -27,13 +26,13 @@ using std::chrono::milliseconds;
 
 }
 
-MainWindow::MainWindow(Config &config, SegmentationEngine *segmentationEngine, QWidget *parent) :
+MainWindow::MainWindow(Config &config, InteractiveSegmentationController *controller, QWidget *parent) :
     QMainWindow(parent),
     _ui(new Ui::MainWindow),
     _config(config),
     _scene(new QGraphicsScene),
     _imagePixmapItem(_scene->addPixmap(QPixmap())),
-    _segmentationEngine(segmentationEngine),
+    _controller(controller),
     _epoch(hires_clock::now())
 {
     _ui->setupUi(this);
@@ -57,21 +56,21 @@ MainWindow::MainWindow(Config &config, SegmentationEngine *segmentationEngine, Q
     _ui->labelsTableWidget->selectRow(0);
 
     // connect to segmentation engine events
-    connect(_segmentationEngine, &SegmentationEngine::recomputeDone, this, &MainWindow::onRecomputeDone);
+    connect(_controller, &InteractiveSegmentationController::recomputeDone, this, &MainWindow::onRecomputeDone);
 
     // setup the splitter to allocate space to log and whatever is above the log with 1:3 ratio
     _ui->splitter->setStretchFactor(0, 3);
     _ui->splitter->setStretchFactor(1, 1);
 
     // connect to events from segmentation engine and display log messages
-    connect(_segmentationEngine, &SegmentationEngine::startedRecompute, [&] { log(tr("Started recompute")); });
-    connect(_segmentationEngine, &SegmentationEngine::trainedSVM, [&] { log(tr("Trained SVM")); });
-    connect(_segmentationEngine, &SegmentationEngine::computedSimilarity, [&] { log(tr("Computed similarity")); });
-    connect(_segmentationEngine, &SegmentationEngine::createdMRF, [&] { log(tr("Created MRF")); });
-    connect(_segmentationEngine, &SegmentationEngine::mapInitialized, [&] { log(tr("MAP engine initialized")); });
-    connect(_segmentationEngine, &SegmentationEngine::iterationFinished, [&] (size_t num, double dual)
-        { log(tr("Iteration %1 finished. Dual: %2").arg(num).arg(dual,0, 'g', 17)); });
-    connect(_segmentationEngine, &SegmentationEngine::recomputeDone, [&] { log(tr("Recompute done")); });
+    connect(_controller, &InteractiveSegmentationController::startedRecompute, [&] { log(tr("Started recompute")); });
+    connect(_controller, &InteractiveSegmentationController::trainedSVM, [&] { log(tr("Trained SVM")); });
+    connect(_controller, &InteractiveSegmentationController::computedSimilarity, [&] { log(tr("Computed similarity")); });
+    connect(_controller, &InteractiveSegmentationController::createdMRF, [&] { log(tr("Created MRF")); });
+    connect(_controller, &InteractiveSegmentationController::mapInitialized, [&] { log(tr("MAP engine initialized")); });
+    connect(_controller, &InteractiveSegmentationController::iterationFinished, [&] (size_t num, double dual)
+        { log(tr("Iteration %1 finished. Dual: %2").arg(num).arg(dual)); });
+    connect(_controller, &InteractiveSegmentationController::recomputeDone, [&] { log(tr("Recompute done")); });
 }
 
 MainWindow::~MainWindow()
@@ -118,7 +117,7 @@ void MainWindow::on_actionScribble_toggled(bool checked)
     if (checked)
     {
         _ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
-        _zoomMediator->SetEnabled(false);
+        _zoomMediator->setEnabled(false);
         _scribbleMediator->setEnabled(true);
     }
 }
@@ -128,7 +127,7 @@ void MainWindow::on_actionErase_toggled(bool checked)
     if (checked)
     {
         _ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
-        _zoomMediator->SetEnabled(false);
+        _zoomMediator->setEnabled(false);
         _scribbleMediator->setEnabled(false);
     }
 }
@@ -138,7 +137,7 @@ void MainWindow::on_actionHand_toggled(bool checked)
     if (checked)
     {
         _ui->graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
-        _zoomMediator->SetEnabled(true);
+        _zoomMediator->setEnabled(true);
         _scribbleMediator->setEnabled(false);
     }
 }
@@ -152,12 +151,12 @@ void MainWindow::on_actionSaveSimilarityMap_triggered()
         tr("Binary Interleaved Format (*.bif);;All files (*.*)")
     );
     if (!fileName.isEmpty())
-        _segmentationEngine->saveSimilarity(fileName);
+        _controller->saveSimilarity(fileName);
 }
 
 void MainWindow::on_actionRecompute_triggered()
 {
-    _segmentationEngine->recompute();
+    _controller->recompute();
 
     _ui->topLayout->setEnabled(false);
     _ui->toolBar->setEnabled(false);
@@ -218,13 +217,13 @@ void MainWindow::addScribbleToSegmentationEngine(QGraphicsPathItem *pi)
     for(auto item : _ui->labelsTableWidget->selectedItems())
     {
         auto labelId = item->row();
-        _segmentationEngine->addScribble(pi->path(), labelId);
+        _controller->addScribble(pi->path(), labelId);
     }
 }
 
 void MainWindow::setImageForSegmentation(QPixmap pixmap)
 {
-    _segmentationEngine->reset(pixmap.toImage());
+    _controller->reset(pixmap.toImage());
 }
 
 void MainWindow::displaySegmentation()
@@ -232,9 +231,9 @@ void MainWindow::displaySegmentation()
     auto pixmap = _segmentedImage.copy();
 
     QPainter painter(&pixmap);
-    for(auto label : _segmentationEngine->getLabels())
+    for(auto label : _controller->getLabels())
     {
-        auto mask = _segmentationEngine->getMaskOf(label);
+        auto mask = _controller->getMaskOf(label);
         auto labelColor = _ui->labelsTableWidget->item(label, 0)->backgroundColor();
 
         labelColor.setAlpha(96);
@@ -291,16 +290,3 @@ void MainWindow::log(const QString &message)
     _ui->log->scrollToBottom();
 }
 
-
-void MainWindow::on_copyLogToClipboard_clicked()
-{
-    QStringList logMessages;
-    for(int row = 0; row < _ui->log->rowCount(); ++row)
-    {
-        auto time = _ui->log->item(row, 0)->text();
-        auto msg = _ui->log->item(row, 1)->text();
-        logMessages.append(QString("%1 : %2").arg(time, 10).arg(msg));
-    }
-
-    QApplication::clipboard()->setText(logMessages.join("\n"));
-}

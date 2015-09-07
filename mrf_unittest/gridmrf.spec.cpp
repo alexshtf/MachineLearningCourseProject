@@ -103,8 +103,8 @@ SCENARIO("Grid MRF stores a graph and potentials for unequal labels")
                     auto idxLess = [] (const auto& l, const auto& r) { return l.index < r.index; };
                     REQUIRE(std::is_sorted(begin(edges), end(edges), idxLess));
 
-                    REQUIRE(edges.at(0).desc == EdgeDesc(pixel1, pixel2));
-                    REQUIRE(edges.at(1).desc == EdgeDesc(pixel1, pixel3));
+                    REQUIRE(edges.at(0).endPoints == EdgeEndpoints(pixel1, pixel2));
+                    REQUIRE(edges.at(1).endPoints == EdgeEndpoints(pixel1, pixel3));
                 }
             }
 

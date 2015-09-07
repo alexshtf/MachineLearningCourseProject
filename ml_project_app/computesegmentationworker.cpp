@@ -101,13 +101,13 @@ double dist(const QImage& image, const Pixel& left, const Pixel& right)
 
 } // anonymous namespace
 
-ComputeSegmentationWorker::ComputeSegmentationWorker(const Config &config, QObject *parent)
+SegmentationEngine::SegmentationEngine(const Config &config, QObject *parent)
     : QObject(parent)
     , _config(config)
 {
 }
 
-void ComputeSegmentationWorker::compute(const QImage &image, const Common::PixelsLabelsArray &descriptors, QMap<int, QVector<QPoint> > scribbles)
+void SegmentationEngine::compute(const QImage &image, const Common::PixelsLabelsArray &descriptors, QMap<int, QVector<QPoint> > scribbles)
 {
     emit startedRecompute();
 
@@ -138,7 +138,7 @@ void ComputeSegmentationWorker::compute(const QImage &image, const Common::Pixel
     emit recomputeDone(mrfMap.primal());
 }
 
-Common::PixelsLabelsArray ComputeSegmentationWorker::computeSimilarity(const Common::PixelsLabelsArray &descriptors, QMap<int, QVector<QPoint>> scribbles)
+Common::PixelsLabelsArray SegmentationEngine::computeSimilarity(const Common::PixelsLabelsArray &descriptors, QMap<int, QVector<QPoint>> scribbles)
 {
     auto similarity = Common::PixelsLabelsArray(descriptors.Rows(), descriptors.Cols(), scribbles.size());
     if (similarity.Labels() <= 1) // we need at-least two labels to perform segmentation
@@ -164,7 +164,7 @@ Common::PixelsLabelsArray ComputeSegmentationWorker::computeSimilarity(const Com
     return similarity;
 }
 
-GridMRF ComputeSegmentationWorker::makeMrf(Common::PixelsLabelsArray similarity, const QImage &image)
+GridMRF SegmentationEngine::makeMrf(Common::PixelsLabelsArray similarity, const QImage &image)
 {
     GridMRF mrf(similarity.Rows(), similarity.Cols(), similarity.Labels(), 6);
 

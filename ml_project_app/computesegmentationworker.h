@@ -9,11 +9,11 @@
 #include <QMap>
 #include <QPoint>
 
-class ComputeSegmentationWorker : public QObject
+class SegmentationEngine : public QObject
 {
     Q_OBJECT
 public:
-    explicit ComputeSegmentationWorker(const class Config& config, QObject *parent = 0);
+    explicit SegmentationEngine(const class Config& config, QObject *parent = 0);
 
 public slots:
     void compute(const QImage& image, const Common::PixelsLabelsArray& descriptors, QMap<int, QVector<QPoint>> scribbles);

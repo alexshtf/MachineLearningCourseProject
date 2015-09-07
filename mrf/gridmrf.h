@@ -13,19 +13,26 @@
 
 struct EdgeInfo
 {
-    EdgeDesc desc;
+    EdgeEndpoints endPoints;
     size_t index;
 
     EdgeInfo() = default;
-    EdgeInfo(EdgeDesc pixels, size_t index)
-        : desc(pixels)
+    EdgeInfo(EdgeEndpoints endPoints, size_t index)
+        : endPoints(endPoints)
         , index(index)
     {}
 };
 
+// Represents an MRF whose vertices are a two-dimensional pixel grid of an image.
+// Edges in this MRF can be specified both by a number (its index) and by its endpoints.
 class GridMRF
 {
 public:
+    // Construct an MRF on a grid of size rows X cols. Each vertex can have an integer label in range [0..labels)
+    // and at most 'neighborsCapacity' neighbors.
+    //
+    // Note: For optimal performance, set 'neighborsCapacity' to at least 1.3 times the actual capacity you plan
+    // on using.
     GridMRF(size_t rows, size_t cols, size_t labels, size_t neighborsCapacity);
 
     // potential setters
@@ -40,15 +47,15 @@ public:
     double getPairwise(size_t edgeIndex, size_t label1, size_t label2) const;
 
     // edge queries
-    std::vector<EdgeInfo> getEdges() const;
-    EdgeInfo getEdgeInfo(const Pixel& from, const Pixel& to) const;
-    EdgeDesc getEdgeKey(size_t edgeIndex) const;
+    std::vector<EdgeInfo> getEdges() const; // all edges.
+    EdgeInfo getEdgeInfo(const Pixel& from, const Pixel& to) const; // a specific edge given by its endpoints
+    EdgeEndpoints getEdgeEndpoints(size_t edgeIndex) const; // a specific edge given by its index.
 
     // dimensions
     size_t cols() const { return _cols; }
     size_t rows() const { return _rows; }
     size_t labels() const { return _labels; }
-    size_t neighborsCapacity() const { return _neighborsCapacity; }\
+    size_t neighborsCapacity() const { return _neighborsCapacity; }
 
 private:
     struct EdgeCell

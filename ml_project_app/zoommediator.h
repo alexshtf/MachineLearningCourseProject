@@ -10,7 +10,7 @@ class ZoomMediator : public QObject
     Q_OBJECT
 public:
     explicit ZoomMediator(QGraphicsView *parent = 0);
-    void SetEnabled(bool flag);
+    void setEnabled(bool flag);
 
 private:
     void GraphicsViewWheelEvent(QWheelEvent* wheelEvent);

@@ -3,6 +3,9 @@
 
 #include <QSettings>
 
+// Configuration class. Specified the properties that the user can configure in the 'Configure'
+// dialog. The properties are saved to the specified QSettings object and loaded from this object
+// on construction.
 class Config
 {
 public:

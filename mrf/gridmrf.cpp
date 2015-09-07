@@ -96,19 +96,19 @@ std::vector<EdgeInfo> GridMRF::getEdges() const
         if ((_edges.origin() + i)->empty)
             continue;
 
-        edges.emplace_back(getEdgeKey(i), i);
+        edges.emplace_back(getEdgeEndpoints(i), i);
     }
 
     // sort by pixels and then by index
     auto idxLess = [] (const auto& l, const auto& r) { return l.index < r.index; };
-    auto descLess = [] (const auto& l, const auto& r) { return l.desc < r.desc; };
+    auto endPointsLess = [] (const auto& l, const auto& r) { return l.endPoints < r.endPoints; };
     std::sort(begin(edges), end(edges), idxLess);
-    std::stable_sort(begin(edges), end(edges), descLess);
+    std::stable_sort(begin(edges), end(edges), endPointsLess);
 
     // remove edges with duplicate keys - stable-sorting above ensures
     // that the lowest index for each edge is used
-    auto descEq = [] (const auto& l, const auto& r) { return l.desc == r.desc; };
-    auto uniqueEnd = std::unique(begin(edges), end(edges), descEq);
+    auto endPointsEq = [] (const auto& l, const auto& r) { return l.endPoints == r.endPoints; };
+    auto uniqueEnd = std::unique(begin(edges), end(edges), endPointsEq);
     edges.erase(uniqueEnd, end(edges));
 
     // sort edges by index and return them
@@ -118,14 +118,14 @@ std::vector<EdgeInfo> GridMRF::getEdges() const
 
 EdgeInfo GridMRF::getEdgeInfo(const Pixel &from, const Pixel &to) const
 {
-    EdgeDesc desc(from, to);
+    EdgeEndpoints desc(from, to);
     auto edge = ConstCellsHashTable(edgesPtrOf(desc.first()), _neighborsCapacity).find(desc.second());
     auto idx = edge - _edges.origin();
 
     return EdgeInfo(desc, idx);
 }
 
-EdgeDesc GridMRF::getEdgeKey(size_t edgeIndex) const
+EdgeEndpoints GridMRF::getEdgeEndpoints(size_t edgeIndex) const
 {
     size_t rowStride = _cols * _neighborsCapacity;
     size_t colStride = _neighborsCapacity;
@@ -133,7 +133,7 @@ EdgeDesc GridMRF::getEdgeKey(size_t edgeIndex) const
          edgeIndex / rowStride,
          (edgeIndex % rowStride) / colStride);
     auto& to = (_edges.origin() + edgeIndex)->neighbor;
-    return EdgeDesc(from, to);
+    return EdgeEndpoints(from, to);
 }
 
 boost::iterator_range<GridMRF::NeighborIterator> GridMRF::neighbors(const Pixel &pixel) const

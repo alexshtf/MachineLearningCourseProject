@@ -8,8 +8,12 @@ TEST_CASE("Neighborhoods")
     size_t cols = 10;
 
     auto neighborsOf = [&] (const Pixel& pixel)  {
-        FourNeighbors n(rows, cols, pixel);
-        return std::vector<Pixel>(n.begin(), n.end());
+        std::vector<Pixel> neighbors;
+
+        for(const auto& n : FourNeighbors(rows, cols, pixel))
+            neighbors.push_back(n);
+
+        return neighbors;
     };
 
     SECTION("Inside pixel has all four neighbors")

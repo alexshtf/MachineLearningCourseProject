@@ -3,7 +3,7 @@
 
 #include "zoommediator.h"
 #include "scribblemediator.h"
-#include "segmentationengine.h"
+#include "interactivesegmentationcontroller.h"
 #include <QMainWindow>
 #include <memory>
 #include <chrono>
@@ -20,7 +20,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(class Config& config, SegmentationEngine* segmentationEngine,  QWidget *parent = 0);
+    explicit MainWindow(class Config& config, InteractiveSegmentationController* controller,  QWidget *parent = 0);
     ~MainWindow();
 
 private slots:
@@ -63,7 +63,7 @@ private:
 
     ZoomMediator* _zoomMediator;
     ScribbleMediator* _scribbleMediator;
-    SegmentationEngine* _segmentationEngine;
+    InteractiveSegmentationController* _controller;
 
     std::chrono::high_resolution_clock::time_point _epoch;
 };

@@ -7,6 +7,7 @@ namespace Ui {
 class ConfigDialog;
 }
 
+// This dialog is opened when the user presses the 'Configure' button on the toolbar.
 class ConfigDialog : public QDialog
 {
     Q_OBJECT
