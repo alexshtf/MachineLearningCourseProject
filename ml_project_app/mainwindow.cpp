@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QGraphicsPixmapItem>
 #include <QPixmap>
+#include <QClipboard>
 #include <random>
 
 namespace {
@@ -69,7 +70,7 @@ MainWindow::MainWindow(Config &config, SegmentationEngine *segmentationEngine, Q
     connect(_segmentationEngine, &SegmentationEngine::createdMRF, [&] { log(tr("Created MRF")); });
     connect(_segmentationEngine, &SegmentationEngine::mapInitialized, [&] { log(tr("MAP engine initialized")); });
     connect(_segmentationEngine, &SegmentationEngine::iterationFinished, [&] (size_t num, double dual)
-        { log(tr("Iteration %1 finished. Dual: %2").arg(num).arg(dual)); });
+        { log(tr("Iteration %1 finished. Dual: %2").arg(num).arg(dual,0, 'g', 17)); });
     connect(_segmentationEngine, &SegmentationEngine::recomputeDone, [&] { log(tr("Recompute done")); });
 }
 
@@ -290,3 +291,16 @@ void MainWindow::log(const QString &message)
     _ui->log->scrollToBottom();
 }
 
+
+void MainWindow::on_copyLogToClipboard_clicked()
+{
+    QStringList logMessages;
+    for(int row = 0; row < _ui->log->rowCount(); ++row)
+    {
+        auto time = _ui->log->item(row, 0)->text();
+        auto msg = _ui->log->item(row, 1)->text();
+        logMessages.append(QString("%1 : %2").arg(time, 10).arg(msg));
+    }
+
+    QApplication::clipboard()->setText(logMessages.join("\n"));
+}

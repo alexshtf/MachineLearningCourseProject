@@ -41,6 +41,8 @@ private slots:
     // events from segmentation engine
     void onRecomputeDone();
 
+    void on_copyLogToClipboard_clicked();
+
 private:
     void clearAllScribbles();
     void showPixmapFitInView(QPixmap pixmap);
