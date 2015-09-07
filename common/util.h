@@ -6,7 +6,7 @@
 
 // assumption - [begin, end) is a non-empty range
 template<typename Iterator, typename Func>
-auto max_and_argmax(Iterator begin, Iterator end, Func func) -> std::tuple<decltype(func(*begin)), decltype(*begin)>
+auto max_and_argmax(Iterator begin, Iterator end, Func func)
 {
     auto argmax = *begin;
     auto max = func(argmax);
@@ -30,11 +30,8 @@ auto max_and_argmax(Iterator begin, Iterator end, Func func) -> std::tuple<declt
 template<typename Iterator, typename Func>
 auto max_value(Iterator begin, Iterator end, Func func)
 {
-    decltype(func(*begin)) max;
-    decltype(*begin) argmax;
-
-    std::tie(max, argmax) = max_and_argmax(begin, end, func);
-    return max;
+    auto maxAndArgmax = max_and_argmax(begin, end, func);
+    return std::get<0>(maxAndArgmax);
 }
 
 // assumption - rng is a non-empty range
