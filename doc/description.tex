@@ -24,6 +24,7 @@
 Since the project goal was to test the effectiveness of the Dual Decomposition method for interactive segmentation, I have developed an interactive segmentation program. Inside, the program performs the required optimization steps. 
 
 \paragraph{Program features}
+A demonstration video of the program's features is available here: \href{https://youtu.be/p81jtROVkYI}{https://youtu.be/p81jtROVkYI}
 \begin{itemize}
 	\item Open and display an image, using a zoom and pan interface
 	\item Draw a scribble for a specific label. The scribble is a 'hint' to the program that the object where the scribble was drawn belongs to the specified label
@@ -32,8 +33,7 @@ Since the project goal was to test the effectiveness of the Dual Decomposition m
 	\item Save the internal unary potentials (similarity map) computed for the image during the segmentation process. These potentials can later be loaded into MATLAB for further analysis (useful for debugging).
 \end{itemize}
 
-A demonstration video of the program's features is available here: \\
-\href{https://youtu.be/bxDGH0K5x7A}{https://youtu.be/bxDGH0K5x7A}
+
 
 \section{Code structure}
 The source code resides in the \texttt{src} directory. The program was written in C++ based on the QT framework - an open-source cross-platform UI framework. It was developed using the Qt Creator IDE. For optimal source-code viewing experience, please install the Qt Creator IDE and open the \texttt{ml\_project.pro} file.
