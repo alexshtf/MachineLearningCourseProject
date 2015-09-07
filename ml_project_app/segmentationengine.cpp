@@ -1,4 +1,4 @@
-#include "computesegmentationworker.h"
+#include "segmentationengine.h"
 #include "starupdatemrfmap.h"
 #include "neighborhoods.h"
 #include "config.h"

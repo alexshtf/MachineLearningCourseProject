@@ -23,7 +23,7 @@ SOURCES += main.cpp\
     scribblemaskgenerator.cpp \
     config.cpp \
     configdialog.cpp \
-    computesegmentationworker.cpp \
+    segmentationengine.cpp \
     metatypes.cpp \
     interactivesegmentationcontroller.cpp
 
@@ -33,7 +33,7 @@ HEADERS  += mainwindow.h \
     scribblemaskgenerator.h \
     config.h \
     configdialog.h \
-    computesegmentationworker.h \
+    segmentationengine.h \
     metatypes.h \
     interactivesegmentationcontroller.h
 

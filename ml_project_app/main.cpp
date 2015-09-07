@@ -2,7 +2,7 @@
 #include "config.h"
 #include "metatypes.h"
 #include "interactivesegmentationcontroller.h"
-#include "computesegmentationworker.h"
+#include "segmentationengine.h"
 #include <QApplication>
 #include <QThread>
 #include <QSettings>

@@ -2,7 +2,7 @@
 
 #include "scribblemaskgenerator.h"
 #include "PixelsLabelsArray.BIF.h"
-#include "computesegmentationworker.h"
+#include "segmentationengine.h"
 #include "config.h"
 
 #include <QPainter>
