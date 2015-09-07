@@ -78,7 +78,7 @@ InteractiveSegmentationController::InteractiveSegmentationController(const Confi
 
     connect(_engine, &SegmentationEngine::startedRecompute, this, &InteractiveSegmentationController::startedRecompute, Qt::QueuedConnection);
     connect(_engine, &SegmentationEngine::trainedSVM, this, &InteractiveSegmentationController::trainedSVM, Qt::QueuedConnection);
-    connect(_engine, &SegmentationEngine::computedSimilarity, this, &InteractiveSegmentationController::computedSimilarity, Qt::QueuedConnection);
+    connect(_engine, &SegmentationEngine::computedSimilarity, this, &InteractiveSegmentationController::onComputedSimilarity, Qt::QueuedConnection);
     connect(_engine, &SegmentationEngine::createdMRF, this, &InteractiveSegmentationController::createdMRF, Qt::QueuedConnection);
     connect(_engine, &SegmentationEngine::mapInitialized, this, &InteractiveSegmentationController::mapInitialized, Qt::QueuedConnection);
     connect(_engine, &SegmentationEngine::iterationFinished, this, &InteractiveSegmentationController::iterationFinished, Qt::QueuedConnection);
@@ -146,7 +146,7 @@ QBitmap InteractiveSegmentationController::getMaskOf(int labelId)
 void InteractiveSegmentationController::saveSimilarity(const QString &fileName)
 {
     // TODO: Find a solution t similarity saving
-    //Common::SaveBIF(computeSimilarity(), fileName.toStdString());
+    Common::SaveBIF(_similarity, fileName.toStdString());
 }
 
 void InteractiveSegmentationController::onRecomputeDone(boost::multi_array<size_t, 2> segmentation)
@@ -155,4 +155,11 @@ void InteractiveSegmentationController::onRecomputeDone(boost::multi_array<size_
     _segmentation = segmentation;
 
     emit recomputeDone();
+}
+
+void InteractiveSegmentationController::onComputedSimilarity(Common::PixelsLabelsArray similarity)
+{
+    _similarity = std::move(similarity);
+
+    emit computedSimilarity();
 }

@@ -21,7 +21,7 @@ public slots:
 signals:
     void startedRecompute();
     void trainedSVM();
-    void computedSimilarity();
+    void computedSimilarity(Common::PixelsLabelsArray similarity);
     void createdMRF();
     void mapInitialized();
     void iterationFinished(uint num, double dual);

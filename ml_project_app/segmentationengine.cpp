@@ -112,7 +112,7 @@ void SegmentationEngine::compute(const QImage &image, const Common::PixelsLabels
     emit startedRecompute();
 
     auto similarity = computeSimilarity(descriptors, scribbles);
-    emit computedSimilarity();
+    emit computedSimilarity(similarity);
 
     auto mrf = makeMrf(std::move(similarity), image);
     emit createdMRF();

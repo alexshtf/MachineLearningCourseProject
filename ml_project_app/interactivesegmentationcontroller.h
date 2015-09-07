@@ -65,15 +65,20 @@ signals:
 
 private slots:
     void onRecomputeDone(boost::multi_array<size_t, 2> segmentation);
+    void onComputedSimilarity(Common::PixelsLabelsArray similarity);
 
 private:
     const class Config& _config;
     class SegmentationEngine* _engine;
 
+    // segmentation input
     QImage _image;
     Common::PixelsLabelsArray _descriptors;
     QMap<int, QList<QPainterPath>> _scribbles;
     QMap<int, ScribbleMaskGenerator> _generators;
+
+    // segmentation output
+    Common::PixelsLabelsArray _similarity;
     boost::multi_array<size_t, 2> _segmentation;
 };
 
