@@ -1,6 +1,118 @@
-\documentclass{report}
+\documentclass[12pt,a4paper]{article}
+\usepackage{hyperref}
+
+\title{Convex Optimization for Interactive Image Segmentation}
+\author{Alex Shtof \\
+        Faculty of Industrial Engineering and Management \\
+        Technion, Israeli Institute of Technology}
+
 
 \begin{document}
-Hello world
+
+\maketitle
+
+\section{Directory structure}
+\begin{itemize}
+	\item \texttt{src} directory contains the source code of the program which was developed for this project
+	\item \texttt{bin} directory contains a 64-bit Windows executable of the program. You may run the executable file in this directory to 'play' with the program.
+	\item \texttt{msvc\_runtime} directory contains files which have to be installed before the program is run (Visual Studio 2015 redistributable runtime). 
+	\item \texttt{matlab\_helpers} directory contains a function which can load a binary file exportable from the application for analysis and debugging.
+\end{itemize}
+
+
+\section{Program overview}
+Since the project goal was to test the effectiveness of the Dual Decomposition method for interactive segmentation, I have developed an interactive segmentation program. Inside, the program performs the required optimization steps. 
+
+\paragraph{Program features}
+\begin{itemize}
+	\item Open and display an image, using a zoom and pan interface
+	\item Draw a scribble for a specific label. The scribble is a 'hint' to the program that the object where the scribble was drawn belongs to the specified label
+	\item Add labels and rename current labels. Each added label is assigned a random color.
+	\item Compute segmentation based on the current scribbles. The user can repeatedly add scribbles and re-compute the segmentation. The segmentation will be displayed as transparent overlay over the image.
+	\item Save the internal unary potentials (similarity map) computed for the image during the segmentation process. These potentials can later be loaded into MATLAB for further analysis (useful for debugging).
+\end{itemize}
+
+A demonstration video of the program's features is available here: \\
+\href{https://youtu.be/bxDGH0K5x7A}{https://youtu.be/bxDGH0K5x7A}
+
+\section{Code structure}
+The source code resides in the \texttt{src} directory. The program was written in C++ based on the QT framework - an open-source cross-platform UI framework. It was developed using the Qt Creator IDE. For optimal source-code viewing experience, please install the Qt Creator IDE and open the \texttt{ml\_project.pro} file.
+
+\paragraph{Build requirements}
+\begin{itemize}
+	\item Qt-Creator version 3.4 or later
+	\item A C++ compiler which is compliant with the latest C++ 14 standard \footnote{ISO International Standard ISO/IEC 14882:2014(E) - Programming Language C++}. The code makes heavy use of modern features. It successfully compiles and runs on GCC 4.9.1 and Visual C++ 2015.
+	\item The Qt framework, version 5.5 or later, compiled with the same compiler you use to compile this program.
+\end{itemize}
+
+\subsection{Directory structure}
+\begin{itemize}
+	\item \texttt{boost-libs}, \texttt{catch} and \texttt{libsvm} directories contain external libraries required for the program.
+	\begin{itemize}
+		\item The Boost C++ libraries \\
+		      \href{http://www.boost.org}{http://www.boost.org} \\
+		      Specifically, we make heavy use of the Boost.MultiArray and Boost.Range libraries.
+		\item The Catch C++ library for writing unit tests \\
+		      \href{https://github.com/philsquared/Catch}{https://github.com/philsquared/Catch}
+		\item The libSVM library for support vector machines \\
+		      \href{https://www.csie.ntu.edu.tw/~cjlin/libsvm}{https://www.csie.ntu.edu.tw/~cjlin/libsvm}
+	\end{itemize}
+	\item \texttt{common} and \texttt{common\_unittest} contain basic C++ utilities and their corresponding unit tests. The library also contains a 3D array class (taken from another project of mine).
+	\item \texttt{mrf} and \texttt{mrf\_unittest} contain data structures used to describe the MRF, the MAP inference engine using Dual Decomposition and the corresponding unit tests.
+	\item \texttt{ml\_project\_app} contains the application UI components. This is the only place where we explicitly depend on Qt and use Qt-specific C++ constructs (see Qt library documentation for more details)
+\end{itemize}
+
+\subsection{The \texttt{ml\_project\_app} module}
+Except for \texttt{void main()}, this module contains several major components:
+\begin{itemize}
+	\item The main window
+	\begin{itemize}
+		\item \texttt{mainwindow.frm} is a Qt form file which describes the UI layout
+		\item \texttt{mainwindow.h} and \texttt{mainwindow.cpp} contain the \texttt{MainWindow} class, which displays the form and responds to user events, such as button clicks.
+		\item \texttt{zoommediator.h} and \texttt{zoommediaror.cpp} contain the \texttt{ZoomMediator} class, which is responsible for zooming and panning user interaction (when the \textit{hand} tool is active) and implements the Mediator design pattern.
+		\item \texttt{scribblemediator.h} and \texttt{scribblemediator.cpp} contain the \texttt{\allowbreak ScribbleMediator} class, which is responsible for drawing scribbles and reporting them to the \texttt{MainWindow} class, and implements the Mediator design pattern.
+	\end{itemize}
+	\item The \texttt{InteractiveSegmentationController} class, which implements the logic behind interactive segmentation. The main window sends commands for adding scribbles and recomputing segmentation to this controller. The controller, in turn, sends events to the main window about the segmentation process (started, iterations, done, ...). 
+	\item The \texttt{SegmentationEngine} class, which is responsible for performing the segmentation on another, non-UI thread. This class directly uses the components exposed by the \texttt{mrf} and the \texttt{libSVM} library to perform the computation. This class is directly used by the \texttt{\allowbreak Interactive\allowbreak Segmentation\allowbreak Controller} class.
+	
+	This two-thread model is required for the program to remain responsive while the segmentation process is running. See \texttt{void main()} and the Qt documentation for more information about the Qt threading model.
+\end{itemize}
+
+\subsection{The \texttt{common} module}
+This module consists of some basic utilities, which include:
+\begin{itemize}
+	\item The \texttt{PixelsLabelsArray} class represents a 3D multi-dimensional array for storing the unary potentials. It is an $W \times H \times L$ array, which is stored in label-row-column order and allocated using a special memory allocator for optimal performance. In addition, the module also contains functions to load and save such arrays into a binary file, which is later loadable into MATLAB using the function in the \texttt{matlab\_helpers} directory.
+	
+	\textbf{Note} that the application also makes heavy use of the multi-dimensional array provided by the \texttt{Boost.MultiArray} library. Both arrays are used for different purposes, and the fragmentation exists because I did not wish to invest the time to remove the dependency on \texttt{PixelsLabelsArray} class.
+	\item Utilities for finding the maximum in a range specified by iterator pairs. See the unit tests for details.
+\end{itemize}
+
+\subsection{The \texttt{mrf} module}
+This module contains data structures useful for representing and manipulating an MRF defined on a grid of pixels, and the code which solves the MRF-MAP program using the Dual Decomposition technique.
+
+This module consists of the following components:
+\begin{itemize}
+	\item The \texttt{coord.h} file contains contains data structures which represent the vertices and edges of a grid MRF. Vertices are \texttt{Pixel} instances, and edges are \texttt{EdgeEndpoints} instances.
+	\item The \texttt{gridmrf.h} and \texttt{gridmrf.cpp} files contain the data structure which represents an MRF defined on a grid of pixels. See the unit tests in \texttt{gridmrf.spec.cpp} for the way this class is supposed to be used.
+	
+	I took special care to implement this data structure such that access to a pixel and its neighborhood will be made in a cache-efficient manner. Specifically:
+	\begin{itemize}
+		\item The unary potentials are stored in a \texttt{PixelsLabelsArray} object. If we scan the pixels row-by-row, we are going to have as little cache misses as we can.
+		\item The edges are stored in a 2D array of $|V| \times N$ size, where $|V|$ is the number of vertices and $N$ is the maximum number of neighbors of each vertex. Hence, for each $i$, the elements $L_i = A[i,0], \dots, A[i,N-1]$ form the list of neighbors of pixel whose index is $i$ in row-major order. 
+		
+		The list $L_i$, for each $i$, is actually a hash-table to allow quick lookup. To look for information stored on the edge between pixel $p$ and pixel $q$ the following steps are performed:
+		\begin{enumerate}
+			\item Compute the index $i$ of pixel $p$
+			\item Lookup in the hash table $L_i$ for the key $p$
+			\item Extract the value from the relevant hash-table cell.
+		\end{enumerate}
+		
+		This way we ensure that access to a pixel and its neighboring edges is done quickly. In addition, scanning the pixels in a row-wise manner ensures that all edges and vertices we access are nearby in memory, hence making the process cache efficient.
+	\end{itemize}
+	\item The \texttt{neighborhoods.h} file contains the \texttt{FourNeighbors} class, which gives an easy interface to scan the neighbors of a pixel. See the unit tests in \texttt{neighborhoods.spec.cpp}.
+	\item The \texttt{MRFMap} class, which is a base class for MRF-MAP inference engine based on solving the Dual Decomposition technique. Specific strategies for updating the dual variables reside in a derived class.
+	\item The \texttt{StarUpdateMRFMap} class, which performs the minimization using the star-update strategy. Minimization is performed in a row-by-row manner for cache efficiency (see above).
+\end{itemize}
+
 \end{document}
 
