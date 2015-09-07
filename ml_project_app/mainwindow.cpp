@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QGraphicsPixmapItem>
 #include <QPixmap>
+#include <QClipboard>
 #include <random>
 
 namespace {
@@ -48,7 +49,6 @@ MainWindow::MainWindow(Config &config, InteractiveSegmentationController *contro
     // ensure that one of the image tools is active each time.
     QActionGroup* imageTools = new QActionGroup(this);
     imageTools->addAction(_ui->actionHand);
-    imageTools->addAction(_ui->actionErase);
     imageTools->addAction(_ui->actionScribble);
     _ui->actionHand->setChecked(true);
 
@@ -290,3 +290,15 @@ void MainWindow::log(const QString &message)
     _ui->log->scrollToBottom();
 }
 
+void MainWindow::on_copyLogToClipboard_clicked()
+{
+    QStringList logMessages;
+    for(int row = 0; row < _ui->log->rowCount(); ++row)
+    {
+        auto time = _ui->log->item(row, 0)->text();
+        auto msg = _ui->log->item(row, 1)->text();
+        logMessages.append(QString("%1 : %2").arg(time, 10).arg(msg));
+    }
+
+    QApplication::clipboard()->setText(logMessages.join("\n"));
+}
