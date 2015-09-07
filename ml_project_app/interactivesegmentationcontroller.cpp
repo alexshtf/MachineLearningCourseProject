@@ -69,20 +69,20 @@ Common::PixelsLabelsArray computeDescriptors(const QImage& image, size_t neighbo
 
 }
 
-InteractiveSegmentationController::InteractiveSegmentationController(const Config &config, ComputeSegmentationWorker *worker, QObject *parent)
+InteractiveSegmentationController::InteractiveSegmentationController(const Config &config, SegmentationEngine *worker, QObject *parent)
     : QObject(parent)
     , _config(config)
-    , _worker(worker)
+    , _engine(worker)
 {
-    connect(this, &InteractiveSegmentationController::compute, _worker, &ComputeSegmentationWorker::compute, Qt::QueuedConnection);
+    connect(this, &InteractiveSegmentationController::compute, _engine, &SegmentationEngine::compute, Qt::QueuedConnection);
 
-    connect(_worker, &ComputeSegmentationWorker::startedRecompute, this, &InteractiveSegmentationController::startedRecompute, Qt::QueuedConnection);
-    connect(_worker, &ComputeSegmentationWorker::trainedSVM, this, &InteractiveSegmentationController::trainedSVM, Qt::QueuedConnection);
-    connect(_worker, &ComputeSegmentationWorker::computedSimilarity, this, &InteractiveSegmentationController::computedSimilarity, Qt::QueuedConnection);
-    connect(_worker, &ComputeSegmentationWorker::createdMRF, this, &InteractiveSegmentationController::createdMRF, Qt::QueuedConnection);
-    connect(_worker, &ComputeSegmentationWorker::mapInitialized, this, &InteractiveSegmentationController::mapInitialized, Qt::QueuedConnection);
-    connect(_worker, &ComputeSegmentationWorker::iterationFinished, this, &InteractiveSegmentationController::iterationFinished, Qt::QueuedConnection);
-    connect(_worker, &ComputeSegmentationWorker::recomputeDone, this, &InteractiveSegmentationController::onRecomputeDone, Qt::QueuedConnection);
+    connect(_engine, &SegmentationEngine::startedRecompute, this, &InteractiveSegmentationController::startedRecompute, Qt::QueuedConnection);
+    connect(_engine, &SegmentationEngine::trainedSVM, this, &InteractiveSegmentationController::trainedSVM, Qt::QueuedConnection);
+    connect(_engine, &SegmentationEngine::computedSimilarity, this, &InteractiveSegmentationController::computedSimilarity, Qt::QueuedConnection);
+    connect(_engine, &SegmentationEngine::createdMRF, this, &InteractiveSegmentationController::createdMRF, Qt::QueuedConnection);
+    connect(_engine, &SegmentationEngine::mapInitialized, this, &InteractiveSegmentationController::mapInitialized, Qt::QueuedConnection);
+    connect(_engine, &SegmentationEngine::iterationFinished, this, &InteractiveSegmentationController::iterationFinished, Qt::QueuedConnection);
+    connect(_engine, &SegmentationEngine::recomputeDone, this, &InteractiveSegmentationController::onRecomputeDone, Qt::QueuedConnection);
 }
 
 InteractiveSegmentationController::~InteractiveSegmentationController()

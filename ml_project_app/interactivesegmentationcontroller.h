@@ -38,7 +38,7 @@ class InteractiveSegmentationController : public QObject
 {
     Q_OBJECT
 public:
-    InteractiveSegmentationController(const class Config& config, class ComputeSegmentationWorker* worker, QObject* parent = nullptr);
+    InteractiveSegmentationController(const class Config& config, class SegmentationEngine* engine, QObject* parent = nullptr);
     ~InteractiveSegmentationController();
 
     void reset(QImage image);
@@ -68,7 +68,7 @@ private slots:
 
 private:
     const class Config& _config;
-    class ComputeSegmentationWorker* _worker;
+    class SegmentationEngine* _engine;
 
     QImage _image;
     Common::PixelsLabelsArray _descriptors;

@@ -17,12 +17,12 @@ int main(int argc, char *argv[])
     Config config(settings);
 
     QThread workerThread;
-    ComputeSegmentationWorker worker(config);
-    worker.moveToThread(&workerThread);
+    SegmentationEngine engine(config);
+    engine.moveToThread(&workerThread);
     workerThread.start();
 
-    InteractiveSegmentationController segmentationEngine(config, &worker);
-    MainWindow w(config, &segmentationEngine);
+    InteractiveSegmentationController controller(config, &engine);
+    MainWindow w(config, &controller);
     w.show();
 
     auto returnCode = a.exec();
